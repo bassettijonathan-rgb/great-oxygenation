@@ -1,0 +1,1404 @@
+<title>Great Oxygenation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A simulation of the Great Oxygenation Event: cyanobacteria, banded iron, the end of the methane greenhouse and Snowball Earth, 3.0 to 1.8 billion years ago.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* A field notebook: warm paper, slate ink, hematite red, cyanobacteria
+   teal, methane amber, ice blue. */
+
+:root {
+  color-scheme: light;
+  --bg: #f4efe4;
+  --paper: #fbf8f1;
+  --surface: #ece5d6;
+  --ink: #1e2328;
+  --ink-2: #48525b;
+  --ink-3: #78828b;
+  --line: #ddd4c2;
+  --rust: #a6432a;
+  --rust-ink: #fff7f0;
+  --teal: #0f7d6b;
+  --amber: #b5741a;
+  --sky: #2c6aa3;
+  --ice: #6b98bd;
+  --good: #1d774b;
+  --good-bg: rgba(29, 119, 75, 0.12);
+  --bad: #ad372b;
+  --bad-bg: rgba(173, 55, 43, 0.1);
+  --plot: #fbf8f1;
+  --plot-fade: rgba(251, 248, 241, 0.86);
+  --ref: rgba(30, 35, 40, 0.07);
+  --ice-band: rgba(107, 152, 189, 0.34);
+  --ice-soft: rgba(107, 152, 189, 0.15);
+  --focus: #2c6aa3;
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --gl: max(16px, env(safe-area-inset-left, 0px));
+  --gr: max(16px, env(safe-area-inset-right, 0px));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #12171c;
+    --paper: #182027;
+    --surface: #1f2830;
+    --ink: #ebe6db;
+    --ink-2: #b8bec4;
+    --ink-3: #87909a;
+    --line: #2c3741;
+    --rust: #e0744f;
+    --rust-ink: #1b0f0a;
+    --teal: #48c6ab;
+    --amber: #e6a849;
+    --sky: #7cb7ea;
+    --ice: #9fc4e4;
+    --good: #5fd096;
+    --good-bg: rgba(95, 208, 150, 0.13);
+    --bad: #f27c69;
+    --bad-bg: rgba(242, 124, 105, 0.12);
+    --plot: #161d23;
+    --plot-fade: rgba(22, 29, 35, 0.86);
+    --ref: rgba(235, 230, 219, 0.07);
+    --ice-band: rgba(159, 196, 228, 0.27);
+    --ice-soft: rgba(159, 196, 228, 0.11);
+    --focus: #7cb7ea;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #12171c;
+  --paper: #182027;
+  --surface: #1f2830;
+  --ink: #ebe6db;
+  --ink-2: #b8bec4;
+  --ink-3: #87909a;
+  --line: #2c3741;
+  --rust: #e0744f;
+  --rust-ink: #1b0f0a;
+  --teal: #48c6ab;
+  --amber: #e6a849;
+  --sky: #7cb7ea;
+  --ice: #9fc4e4;
+  --good: #5fd096;
+  --good-bg: rgba(95, 208, 150, 0.13);
+  --bad: #f27c69;
+  --bad-bg: rgba(242, 124, 105, 0.12);
+  --plot: #161d23;
+  --plot-fade: rgba(22, 29, 35, 0.86);
+  --ref: rgba(235, 230, 219, 0.07);
+  --ice-band: rgba(159, 196, 228, 0.27);
+  --ice-soft: rgba(159, 196, 228, 0.11);
+  --focus: #7cb7ea;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--font-body);
+  overflow-x: hidden;
+}
+
+/* paints the band above the sticky bar on phones with a notch */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+sup {
+  font-size: 0.68em;
+  line-height: 0;
+  vertical-align: 0.48em;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.app {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-block: 0 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---- masthead and the sticky bar */
+
+.masthead {
+  padding: 20px 0 10px;
+}
+
+.masthead h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 6.4vw, 44px);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.masthead p {
+  margin: 6px 0 0;
+  color: var(--ink-2);
+  max-width: 60ch;
+}
+
+.bar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0 calc(-1 * var(--gr)) 14px calc(-1 * var(--gl));
+  padding: 8px var(--gr) 0 var(--gl);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+  flex: none;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.icon-btn.play {
+  background: var(--rust);
+  color: var(--rust-ink);
+  border-color: transparent;
+  padding: 0 15px 0 11px;
+  min-width: 92px;
+}
+
+.clock {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  padding-left: 4px;
+}
+
+.age {
+  font: 500 25px var(--font-mono);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock .unit {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.speed select {
+  height: 40px;
+  border-radius: 999px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 14px;
+  cursor: pointer;
+  max-width: 112px;
+}
+
+@media (max-width: 429px) {
+  .icon-btn.play {
+    min-width: 44px;
+    padding: 0 12px;
+  }
+
+  .icon-btn.play span {
+    display: none;
+  }
+
+  .speed select {
+    max-width: 96px;
+    padding: 0 6px;
+  }
+}
+
+.timeline {
+  flex: 1 1 100%;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.timeline .track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.timeline .fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--amber), var(--rust) 55%, var(--sky));
+  background-size: 100vw 100%;
+}
+
+/* ---- columns */
+
+.cols {
+  display: block;
+}
+
+.stage,
+#panel-learn,
+#panel-watch,
+#charts,
+#side {
+  scroll-margin-top: calc(env(safe-area-inset-top, 0px) + var(--bar-h, 78px) + 8px);
+}
+
+.scene-wrap {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0e202b;
+  aspect-ratio: 16 / 9.5;
+}
+
+@media (min-width: 1040px) {
+  .scene-wrap {
+    aspect-ratio: 2 / 1;
+  }
+}
+
+#scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scene-help {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.86);
+  color: #1e2328;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 20px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(18, 22, 26, 0.88);
+  color: #fff;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.error {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bad-bg);
+  color: var(--bad);
+  font-weight: 700;
+}
+
+.layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 6px;
+}
+
+.chip {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.key i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.key.faint {
+  color: var(--ink-3);
+}
+
+.narrator {
+  font-size: 17px;
+  line-height: 1.45;
+  margin: 12px 0;
+  min-height: 4.4em;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--ink-3);
+  vertical-align: 2px;
+  margin-right: 2px;
+}
+
+.tag-air {
+  color: var(--sky);
+}
+.tag-ice {
+  color: var(--ice);
+}
+.tag-rock {
+  color: var(--rust);
+}
+.tag-life {
+  color: var(--teal);
+}
+.tag-volcano {
+  color: var(--amber);
+}
+.tag-lab {
+  color: var(--ink);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  background: none;
+  border: 0;
+  border-bottom: 1px dotted var(--ink-3);
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.term {
+  background: none;
+  border: 0;
+  padding: 0;
+  border-bottom: 1.5px dotted var(--teal);
+  cursor: pointer;
+  color: inherit;
+  text-align: inherit;
+}
+
+.readouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+@media (min-width: 440px) {
+  .readouts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 760px) {
+  .readouts {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  text-align: left;
+  cursor: pointer;
+}
+
+.r-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-3);
+}
+
+.r-value {
+  font: 500 15px var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.r-unit {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.readout.flash {
+  animation: flash 1.4s ease 2;
+}
+
+@keyframes flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  40% {
+    box-shadow: 0 0 0 3px var(--amber);
+  }
+}
+
+/* ---- tabs and panels */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin: 24px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--ink-3);
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--rust);
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+}
+
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.005em;
+}
+
+.panel h2 {
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 2px 0 10px;
+}
+
+.panel h3 {
+  font-size: 17px;
+  margin: 22px 0 8px;
+}
+
+.lede {
+  color: var(--ink-2);
+  margin: 0 0 8px;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0 0 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-weight: 700;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--rust);
+  border-color: transparent;
+  color: var(--rust-ink);
+}
+
+.btn.ghost {
+  background: transparent;
+}
+
+.btn.small {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- charts */
+
+#back-to-lesson {
+  margin: 0 0 10px;
+}
+
+#charts {
+  display: block;
+  width: 100%;
+  height: 470px;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+@media (min-width: 700px) {
+  #charts {
+    height: 540px;
+  }
+}
+
+.chart-caption {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  margin: 10px 0 8px;
+  min-height: 3em;
+}
+
+.chart-caption b {
+  color: var(--ink);
+}
+
+.lip-name {
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.lith-legend {
+  font-size: 12px;
+}
+
+.events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+}
+
+.events li {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 0 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ev-age {
+  font: 500 13px var(--font-mono);
+  color: var(--ink-2);
+  grid-row: span 2;
+  padding-top: 1px;
+}
+
+/* ---- Learn */
+
+.chapter-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kicker {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+.dots {
+  display: flex;
+  gap: 0;
+}
+
+.dot {
+  position: relative;
+  width: 22px;
+  height: 26px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.dot::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+}
+
+.dot.done::before {
+  background: var(--ink-3);
+}
+
+.dot.on::before {
+  background: var(--rust);
+  border-color: var(--rust);
+}
+
+.chapter p {
+  margin: 0 0 12px;
+  max-width: 64ch;
+}
+
+.predict {
+  margin: 18px 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--amber);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.predict-q {
+  font-weight: 700;
+  margin: 4px 0 10px !important;
+}
+
+.options {
+  display: grid;
+  gap: 6px;
+}
+
+.option {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.option.right {
+  border-color: var(--good);
+  background: var(--good-bg);
+}
+
+.option.wrong {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+.option.dim {
+  opacity: 0.55;
+}
+
+.option[aria-disabled='true'] {
+  cursor: default;
+}
+
+.predict-a {
+  margin: 12px 0 0 !important;
+}
+
+.show {
+  margin: 16px 0;
+}
+
+.look {
+  margin: 12px 0 0 !important;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.glossary summary {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.glossary dl {
+  margin: 0;
+}
+
+.glossary dt {
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.glossary dd {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+}
+
+/* ---- Lab */
+
+.scenarios {
+  display: grid;
+  gap: 6px;
+}
+
+@media (min-width: 560px) and (max-width: 1039px) {
+  .scenarios {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.scenario,
+.inject {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  text-align: left;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.scenario span,
+.inject span {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.scenario[aria-checked='true'] {
+  border-color: var(--rust);
+  box-shadow: inset 4px 0 0 var(--rust);
+}
+
+.seed-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.seed-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.seed-field input {
+  width: 96px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-family: var(--font-mono);
+}
+
+.sliders {
+  display: grid;
+  gap: 14px;
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  font-size: 14.5px;
+}
+
+.slider input {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--rust);
+}
+
+.slider output {
+  font: 500 13px var(--font-mono);
+  color: var(--ink-2);
+}
+
+.s-note {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.toggles {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--rust);
+  flex: none;
+}
+
+.toggle span {
+  color: var(--ink-2);
+}
+
+.toggle b {
+  color: var(--ink);
+}
+
+.lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.injects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+/* ---- Validation */
+
+.check-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.score {
+  font-size: 16px;
+  margin: 12px 0 4px;
+}
+
+.score b {
+  font: 700 30px var(--font-display);
+  margin-right: 2px;
+}
+
+.check-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 4px 0 14px;
+}
+
+.check-run .hint {
+  margin: 0;
+}
+
+.progress {
+  flex: 1 1 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--teal);
+}
+
+.checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.check {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.check-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.badge {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pass .badge {
+  background: var(--good-bg);
+  color: var(--good);
+}
+
+.miss .badge {
+  background: var(--bad-bg);
+  color: var(--bad);
+}
+
+.check dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 10px;
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+
+.check dt {
+  padding-top: 2px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.check dd {
+  margin: 0;
+}
+
+.why {
+  margin: 8px 0 4px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.source {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* ---- the explanation sheet */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(10, 14, 18, 0.42);
+}
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 41;
+  transform: translateX(-50%);
+  width: min(560px, 100%);
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: 18px max(18px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  border-radius: 14px 14px 0 0;
+  background: var(--paper);
+  box-shadow: 0 -10px 34px rgba(0, 0, 0, 0.25);
+}
+
+@media (min-width: 700px) {
+  .sheet {
+    bottom: 24px;
+    border-radius: 14px;
+  }
+}
+
+.sheet h2 {
+  font-size: 23px;
+  margin: 4px 44px 6px 0;
+}
+
+.sheet p {
+  margin: 0 0 10px;
+}
+
+.sheet-value {
+  font: 500 19px var(--font-mono);
+}
+
+.sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.foot {
+  margin-top: 36px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.foot a {
+  color: var(--ink-2);
+}
+
+/* ---- wide screens: picture and charts on the left, the rest on the right */
+
+@media (min-width: 1040px) {
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .side {
+    position: sticky;
+    top: calc(env(safe-area-inset-top, 0px) + var(--bar-h, 78px) + 10px);
+    max-height: calc(100vh - env(safe-area-inset-top, 0px) - var(--bar-h, 78px) - 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 6px 20px 2px;
+  }
+
+  .tabs {
+    margin-top: 0;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg);
+  }
+
+  .tabs [data-tab='watch'] {
+    display: none;
+  }
+
+  #panel-watch {
+    margin-top: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .readout.flash {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--amber);
+  }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="masthead">
+    <h1>The Great Oxygenation</h1>
+    <p>How microbes filled the air with oxygen, froze the planet and rusted the sea, 3.0 to 1.8 billion years ago.</p>
+  </header>
+
+  <div class="bar" id="bar">
+    <button type="button" class="icon-btn play" id="play" aria-label="Play"></button>
+    <button type="button" class="icon-btn" id="step" aria-label="Step half a million years" title="Step half a million years"></button>
+    <div class="clock" aria-live="off">
+      <span class="age" id="age">3.000</span>
+      <span class="unit">billion years ago</span>
+    </div>
+    <label class="speed"><span class="sr">Speed</span><select id="speed" title="Speed"></select></label>
+    <button type="button" class="icon-btn" id="restart" aria-label="Restart from 3.0 billion years ago" title="Restart"></button>
+    <div class="timeline" id="timeline" role="slider" aria-label="Time: tap ahead to run there" aria-valuemin="1.8" aria-valuemax="3.0" aria-valuenow="3.0" tabindex="-1">
+      <div class="track"><div class="fill" id="tl-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <main class="main-col" id="main-col">
+      <section class="stage" id="stage" aria-label="The planet now">
+        <div class="error" id="error" role="alert" hidden></div>
+        <div class="scene-wrap">
+          <canvas id="scene" role="img" aria-label="A slice through the ocean from the coast to a mid-ocean ridge, with the sky, a volcano and a small globe"></canvas>
+          <button type="button" class="scene-help" id="scene-help" aria-label="How to read the picture">?</button>
+          <div class="toast" id="toast" role="status" hidden></div>
+        </div>
+        <div class="layers" id="layers" role="group" aria-label="Colour the water by"></div>
+        <div class="legend" id="legend"></div>
+        <p class="narrator" id="narrator"></p>
+        <div class="readouts" id="readouts"></div>
+      </section>
+    </main>
+
+    <aside class="side" id="side">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+        <button type="button" role="tab" data-tab="watch">Charts</button>
+        <button type="button" role="tab" data-tab="learn">Learn</button>
+        <button type="button" role="tab" data-tab="lab">Lab</button>
+        <button type="button" role="tab" data-tab="check">Validation</button>
+      </nav>
+      <section class="panel" data-panel="watch" id="panel-watch" aria-label="Charts">
+        <button type="button" class="btn ghost small" id="back-to-lesson" hidden>← Back to the lesson</button>
+        <canvas id="charts" role="img" aria-label="Charts of oxygen, greenhouse gases, temperature, sulfur and carbon isotopes and banded iron through time"></canvas>
+        <p class="chart-caption" id="chart-caption"></p>
+        <div class="legend lith-legend" id="lith-legend"></div>
+        <h3>What happened</h3>
+        <ol class="events" id="events"></ol>
+      </section>
+      <section class="panel" data-panel="learn" id="panel-learn" aria-label="Learn"></section>
+      <section class="panel" data-panel="lab" id="panel-lab" aria-label="Lab"></section>
+      <section class="panel" data-panel="check" id="panel-check" aria-label="Validation"></section>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    A teaching model, not a forecast of the past: one ocean slice stands for every coast, and many numbers are tuned.
+    <a href="https://github.com/bassettijonathan-rgb/great-oxygenation" target="_blank" rel="noopener">Code and notes</a>
+  </footer>
+</div>
+
+<div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Explanation" hidden>
+  <button type="button" class="sheet-close" id="sheet-close" aria-label="Close">×</button>
+  <div id="sheet-body"></div>
+</div>
+
+<script>
+(()=>{var Q={checks:[{id:"goe",what:"Oxygen first rises above 1/100,000 of today’s level",model:"2.47 Ga",real:"about 2.43 Ga (accept 2.50 to 2.30)",pass:!0,source:"Gumsley et al. 2017; Warke et al. 2020"},{id:"mif",what:"Sulfur isotopes lose their mass-independent signal for good",model:"2.23 Ga",real:"about 2.22 to 2.33 Ga (accept 2.35 to 2.20)",pass:!0,source:"Luo et al. 2016; Poulton et al. 2021"},{id:"methane",what:"Methane in the air at 2.7 Ga",model:"99 ppm",real:"tens to hundreds of ppm (accept 20 to 3,000)",pass:!0,source:"Pavlov et al. 2000; Haqq-Misra et al. 2008"},{id:"warm",what:"Mean surface temperature at 2.7 Ga, under a fainter Sun",model:"8.7 °C",real:"liquid oceans, no ice near the equator (accept 0 to 40 °C)",pass:!0,source:"Feulner 2012 (the faint young Sun problem)"},{id:"bif",what:"Oxide banded iron is laid down fastest before oxygen rises",model:"peak at 2.77 Ga",real:"big pulses near 2.7 and 2.5 Ga, before oxygen rose",pass:!0,source:"Bekker et al. 2010"},{id:"huronian",what:"Ice reaches below 35° latitude (or the equator) between 2.45 and 2.22 Ga",model:"Snowball at 2.36 Ga",real:"Makganyene and Huronian glaciations, 2.43 to 2.29 Ga, some near the equator",pass:!0,source:"Evans et al. 1997; Gumsley et al. 2017"},{id:"warmAfter",what:"No ice age from 2.15 to 1.8 Ga (ice stays poleward of 40°)",model:"ice line at least 42°",real:"no glacial deposits for over a billion years after 2.2 Ga",pass:!0,source:"Hoffman 2013"},{id:"o2Later",what:"Oxygen in the air at 2.0 Ga",model:"0.95 % of today",real:"about 0.1 to 10 % of today (accept 0.1 to 40 %)",pass:!0,source:"Kump 2008; Planavsky et al. 2014"},{id:"deep",what:"The deep sea still has no oxygen at 2.0 Ga",model:"0.00 µM of O₂, 23 µM of iron below 500 m",real:"deep water stayed iron-rich or sulfidic",pass:!0,source:"Poulton & Canfield 2011"},{id:"lomagundi",what:"Carbonate δ¹³C climbs 5 ‰ above its Archean level between 2.25 and 2.0 Ga",model:"+2.8 ‰ at 2.25 Ga",real:"+8 to +12 ‰ (the Lomagundi event, 2.22 to 2.06 Ga)",pass:!1,source:"Karhu & Holland 1996; Bekker 2022",why:"In the model the burst of phosphate from weathering long-buried sulfide rock comes right after the first rise of oxygen and is small, so carbon isotopes rise only a little, and too early. What drove the real shift of about +10 ‰ is still debated."},{id:"bifGap",what:"Banded iron fades after oxygen rises (2.2 to 1.9 Ga under half of 2.6 Ga onward)",model:"79 % of the earlier rate",real:"almost none from 2.4 until 1.9 Ga",pass:!1,source:"Bekker et al. 2010",why:"Vents keep feeding iron into the model’s deep sea, and rust keeps forming where it meets oxygen near the surface. In the real ocean the deep water may have turned sulfidic, trapping the iron as pyrite; this model makes too little sulfate for that."}],passed:9,total:11};function As(a){let e=String(a),t=2166136261;for(let s=0;s<e.length;s++)t^=e.charCodeAt(s),t=Math.imul(t,16777619);return t>>>0}var ut=class{constructor(e=1){let t=As(e);this.a=t,this.b=(t^2654435769)>>>0,this.c=(t^608135816)>>>0,this.d=1;for(let s=0;s<16;s++)this.u32()}u32(){let{a:e,b:t,c:s,d:o}=this,i=(e+t|0)+o|0;return o=o+1|0,e=t^t>>>9,t=s+(s<<3)|0,s=s<<21|s>>>11,s=s+i|0,this.a=e,this.b=t,this.c=s,this.d=o,i>>>0}float(){return this.u32()/4294967296}int(e){return Math.floor(this.float()*e)}binomial(e,t){if(e<=0||t<=0)return 0;if(t>=1)return e;if(t>.5)return e-this.binomial(e,1-t);let s=e*t;if(s<25){let r=1-t,l=t/r,d=(e+1)*l,f=Math.pow(r,e),m=this.float(),g=0;for(;m>f;){if(m-=f,g++,g>e)return e;if(f*=d/g-l,f<=0)break}return g}let o=Math.sqrt(s*(1-t)),i=Math.sqrt(-2*Math.log(1-this.float()))*Math.cos(2*Math.PI*this.float());return Math.max(0,Math.min(e,Math.round(s+o*i)))}shuffle(e){for(let t=e.length-1;t>0;t--){let s=this.int(t+1),o=e[t];e[t]=e[s],e[s]=o}return e}};var Lt={NX:56,NZ:20,width:14e5,depth:4e3,shelfEdge:2e5,ridgeX:108e4,oceanArea:36e13,kh:300,khShelf:300,riverPlume:1e5,kvMixed:.005,kvShelf:.001,kvDeep:3e-5,mixedDepth:50,upwelling:.2,overturning:.12,pistonVelocity:1e3,lightDepth:20,henryO2:1300,henryCH4:1400,muCyano:300,muFerro:1500,kP:.1,kFe:5,CP:106,martinOxic:.86,martinAnoxic:.45,burialOxic:.08,burialAnoxic:.2,pRetainAnoxic:.35,kSO4:400,dirShare:.5,dirRelease:.6,kdP:.0087,feSat:60,feSatRate:.01,kO2:.5,moxRate:30,aomRate:.02,hsOxRate:300,fesRate:300},Ge=1e-6,Ha=.001,Ft=a=>{let e=a-Ha;return .5*(e+Math.sqrt(e*e+Ge*Ge))},Ra=a=>{let e=a-Ha;return .5*(1+e/Math.sqrt(e*e+Ge*Ge))};function Ea(a,e,t){let s=Math.min(1,Math.max(0,(t-a)/(e-a)));return s*s*(3-2*s)}function Os(a){let e=Lt;if(a<e.shelfEdge)return 25+125*(a/e.shelfEdge);let t=150+3650*Ea(e.shelfEdge,e.shelfEdge+26e4,a),s=1500*Math.exp(-(((a-e.ridgeX)/9e4)**2));return t-s}var ze=class{constructor(e,t){this.n=e,this.p=t,this.w=2*t+1,this.a=new Float64Array(e*this.w)}load(e){this.a.set(e)}add(e,t,s){this.a[e*this.w+(t-e+this.p)]+=s}factor(){let{n:e,p:t,w:s,a:o}=this;for(let i=0;i<e;i++){let r=i*s-i+t,l=o[r+i],d=Math.min(e-1,i+t);for(let f=i+1;f<=d;f++){let m=f*s-f+t,g=o[m+i];if(g===0)continue;let w=g/l;o[m+i]=w;for(let x=i+1;x<=d;x++)o[m+x]-=w*o[r+x]}}}solve(e,t){let{n:s,p:o,w:i,a:r}=this;for(let l=0;l<s;l++){let d=e[l],f=l*i-l+o;for(let m=Math.max(0,l-o);m<l;m++)d-=r[f+m]*t[m];t[l]=d}for(let l=s-1;l>=0;l--){let d=t[l],f=l*i-l+o,m=Math.min(s-1,l+o);for(let g=l+1;g<=m;g++)d-=r[f+g]*t[g];t[l]=d/r[f+l]}}},_t=["P","E","M","H","theta","cf","rustCol","rustCell"],Pt=class{constructor(){let e=Lt,t=e.NX,s=e.NZ;this.NX=t,this.NZ=s,this.N=t*s;let o=this.N;this.dx=e.width/t,this.margin=e.oceanArea/e.width,this.scale=.001*this.margin,this.zi=new Float64Array(s+1);for(let r=0;r<=s;r++)this.zi[r]=e.depth*(r/s)**2;this.zc=new Float64Array(s),this.hk=new Float64Array(s);for(let r=0;r<s;r++)this.zc[r]=.5*(this.zi[r]+this.zi[r+1]),this.hk[r]=this.zi[r+1]-this.zi[r];this.floor=new Float64Array(t),this.kb=new Int32Array(t),this.water=new Uint8Array(o),this.vol=new Float64Array(o);for(let r=0;r<t;r++){let l=Os((r+.5)*this.dx);this.floor[r]=l;let d=0;for(let f=0;f<s;f++)(f===0||this.zc[f]<l)&&(this.water[this.idx(r,f)]=1,d=f);this.kb[r]=d;for(let f=0;f<=d;f++)this.vol[this.idx(r,f)]=this.dx*this.hk[f]}this.light=new Float64Array(s);for(let r=0;r<s;r++){let l=e.lightDepth;this.light[r]=l/this.hk[r]*(Math.exp(-this.zi[r]/l)-Math.exp(-this.zi[r+1]/l))}for(this.nPhotic=0;this.nPhotic<s&&this.light[this.nPhotic]>.01;)this.nPhotic++;this.ventCells=[];for(let r=0;r<t;r++){let l=(r+.5)*this.dx;Math.abs(l-e.ridgeX)<.75*9e4&&this.ventCells.push(this.idx(r,this.kb[r]))}this.riverCells=[],this.riverShare=[];let i=0;for(let r=0;r<t;r++){let l=(r+.5)*this.dx;if(l>e.shelfEdge)break;let d=Math.exp(-l/e.riverPlume);for(let f=0;f<2&&f<=this.kb[r];f++)this.riverCells.push(this.idx(r,f)),this.riverShare.push(d*this.hk[f]),i+=d*this.hk[f]}for(let r=0;r<this.riverShare.length;r++)this.riverShare[r]/=i;this.buildTransport(),this.Tdiag=new Float64Array(o);for(let r=0;r<o;r++)this.Tdiag[r]=this.T.a[r*this.T.w+this.T.p];this.mP=new ze(o,s),this.mM=new ze(o,s),this.mH=new ze(o,s),this.mE=new ze(o,s),this.P=new Float64Array(o),this.E=new Float64Array(o),this.M=new Float64Array(o),this.H=new Float64Array(o),this.O2=new Float64Array(o),this.Fe=new Float64Array(o),this.theta=new Float64Array(o),this.cf=new Float64Array(o),this.rustCol=new Float64Array(t),this.rhs=new Float64Array(o),this.tmp=new Float64Array(o),this.resp=new Float64Array(o),this.lamC=new Float64Array(o),this.lamF=new Float64Array(o),this.kapF=new Float64Array(o),this.feOld=new Float64Array(o),this.fixC=new Float64Array(o),this.fes=new Float64Array(o),this.exportC=new Float64Array(t),this.burFrac=new Float64Array(t),this.pRet=new Float64Array(t),this.rustCell=new Float64Array(o),this.respPot=new Float64Array(o),this.eTry=new Float64Array(o),this.res2=new Float64Array(o),this.rsc=new Float64Array(o),this.lin=new Float64Array(o),this.gasK=new Float64Array(o),this.dem=new Float64Array(o),this.ferroMax=new Float64Array(o),this.fesK=new Float64Array(o),this.res=new Float64Array(o),this.jd=new Float64Array(o),this.mOld=new Float64Array(o),this.hOld=new Float64Array(o),this.fOx=new Float64Array(o),this.feX=new Float64Array(o),this.srcM=new Float64Array(o),this.srcH=new Float64Array(o),this.srcFe=new Float64Array(o),this.remin=new Float64Array(o),this.toFloor=new Float64Array(t),this.openW=new Float64Array(t),this.diag={prodCyano:new Float64Array(o),prodFerro:new Float64Array(o),rust:new Float64Array(o),methane:new Float64Array(o),bifOx:new Float64Array(t),bifRed:new Float64Array(t),pyrite:new Float64Array(t),orgBur:new Float64Array(t),seepCH4:new Float64Array(t)},this.reset()}idx(e,t){return e*this.NZ+t}reset(e=20,t=1.5){for(let s=0;s<this.N;s++){let o=this.water[s];this.P[s]=o?t:0,this.E[s]=o?-e/4:0,this.M[s]=0,this.H[s]=0,this.theta[s]=0,this.cf[s]=0}this.rustCol.fill(0),this.rustCell.fill(0),this.views()}buildTransport(){let e=Lt,{NX:t,NZ:s,N:o,dx:i,zi:r}=this,l=e.width,d=c=>r[this.kb[c]+1],f=new Float64Array((t+1)*(s+1)),m=(c,u)=>c*(s+1)+u,g=(c,u)=>c>=0&&c<t&&u>=0&&u<s&&this.water[this.idx(c,u)]===1;for(let c=1;c<t;c++)for(let u=1;u<s;u++){if(!(g(c-1,u-1)&&g(c,u-1)&&g(c-1,u)&&g(c,u)))continue;let b=c*i,k=r[u],p=Math.min(d(c-1),d(c)),C=Math.min(p,300),y=Ea(0,e.shelfEdge,b)*Math.exp(-Math.max(0,b-e.shelfEdge)/12e4),T=k<C?Math.sin(Math.PI*k/C):0,P=1e5,G=b<l-P?Math.min(1,Math.max(0,(b-1e5)/(l-P-1e5))):Math.max(0,(l-b)/P),z=Math.sin(Math.PI*k/p);f[m(c,u)]=-(e.upwelling*y*T+e.overturning*G*z)*3156e4}this.qx=new Float64Array(o),this.qz=new Float64Array(o),this.dE=new Float64Array(o),this.dD=new Float64Array(o);for(let c=0;c<t;c++){let u=this.floor[c]<200;for(let b=0;b<s;b++){let k=this.idx(c,b);if(this.water[k]){if(g(c+1,b)){this.qx[k]=f[m(c+1,b)]-f[m(c+1,b+1)];let p=this.floor[c]<200?e.khShelf:e.kh;this.dE[k]=p*this.hk[b]/i*3156e4}if(g(c,b+1)){this.qz[k]=f[m(c+1,b+1)]-f[m(c,b+1)];let p=r[b+1]<e.mixedDepth?e.kvMixed:u?e.kvShelf:e.kvDeep;this.dD[k]=p*i/(this.zc[b+1]-this.zc[b])*3156e4}}}}let w=new ze(o,s);for(let c=0;c<o;c++)this.water[c]||w.add(c,c,1);let x=(c,u,b,k)=>{w.add(c,c,b),w.add(c,u,-b),w.add(u,u,b),w.add(u,c,-b),k>0?(w.add(c,c,k),w.add(u,c,-k)):k<0&&(w.add(u,u,-k),w.add(c,u,k))};for(let c=0;c<o;c++)this.water[c]&&(this.dE[c]>0&&x(c,c+s,this.dE[c],this.qx[c]),this.dD[c]>0&&x(c,c+1,this.dD[c],this.qz[c]));this.T=w}transportOut(e,t){let{N:s,NZ:o}=this,{a:i,w:r,p:l}=this.T;for(let d=0;d<s;d++){if(!this.water[d]){t[d]=0;continue}let f=d*r-d+l,m=0,g=Math.max(0,d-o),w=Math.min(s-1,d+o);for(let x=g;x<=w;x++)m+=i[f+x]*e[x];t[d]=m}}views(){for(let e=0;e<this.N;e++){if(!this.water[e]){this.O2[e]=0,this.Fe[e]=0;continue}let t=this.E[e],s=Math.sqrt(t*t+Ge*Ge);this.O2[e]=.5*(t+s),this.Fe[e]=2*(s-t)}}solve(e,t){let s=Lt,{NX:o,NZ:i,N:r,vol:l,water:d,P:f,E:m,M:g,H:w,theta:x,cf:c}=this,u=this.scale,b=this.diag,k=Math.min(o,Math.max(0,(1-e.iceFrac)*o));this.iceCols=o-k;let p=Math.ceil(k),C=this.openW;for(let n=0;n<o;n++)C[n]=Math.min(1,Math.max(0,k-n));let y=s.pistonVelocity*this.dx,T=s.henryO2*e.pO2,P=s.henryCH4*e.pCH4,G=e.tempFactor,z=Math.max(0,e.SO4),$=z/(z+s.kSO4),E=s.aomRate*(z/(z+200)),j=1/u,H=this.nPhotic,O=this.rhs,K=n=>n/i|0,X=this.mOld,ae=this.hOld;X.set(g),ae.set(w);let je=this.feOld;for(let n=0;n<r;n++)je[n]=this.Fe[n];let _e=this.remin;_e.fill(0);let Xe=this.burFrac,lt=this.pRet;for(let n=0;n<o;n++){let S=1;for(let W=H;W<=this.kb[n];W++){let M=this.idx(n,W),L=s.martinAnoxic+(s.martinOxic-s.martinAnoxic)*x[M],Y=S*(1-(this.zi[W]/this.zi[W+1])**L);_e[M]=Y,S-=Y}this.toFloor[n]=S;let R=x[this.idx(n,this.kb[n])];Xe[n]=s.burialAnoxic+(s.burialOxic-s.burialAnoxic)*R,lt[n]=s.pRetainAnoxic+(1-s.pRetainAnoxic)*R}let He=this.lamC,Ye=this.lamF;He.fill(0),Ye.fill(0);let me=this.mP;me.load(this.T.a);for(let n=0;n<r;n++)O[n]=0,d[n]&&(me.add(n,n,l[n]/t+s.kdP*this.rustCell[n]),O[n]=l[n]/t*f[n]);this.riverCells.forEach((n,S)=>O[n]+=e.riverP*j*this.riverShare[S]);for(let n=0;n<p;n++){let S=this.kb[n],R=this.idx(n,S),W=this.toFloor[n]*(1-Xe[n]*lt[n]);for(let M=0;M<H&&M<=S;M++){let L=this.idx(n,M),Y=this.light[M]*e.lightFactor*C[n];He[L]=s.muCyano*e.cyano*Y*G/(s.CP*(f[L]+s.kP)),Ye[L]=c[L]/(s.CP*l[L]*Math.max(f[L],.001));let _=(He[L]+Ye[L])*l[L];if(_!==0){me.add(L,L,_);for(let V=H;V<=S;V++)me.add(this.idx(n,V),L,-_*_e[this.idx(n,V)]);me.add(R,L,-_*W)}}}me.factor(),me.solve(O,f);for(let n=0;n<r;n++)(f[n]<0||!d[n])&&(f[n]=0);let Ee=this.fixC;Ee.fill(0);let ht=0,Ve=0,Ke=0;for(let n=0;n<r;n++)d[n]&&(Ke+=s.kdP*this.rustCell[n]*f[n]);let ge=this.respPot;ge.fill(0);let Se=this.srcFe;Se.fill(0);let vt=0,q=0,U=0,F=0,B=0;for(let n=0;n<o;n++){let S=0,R=0,W=this.kb[n];for(let J=0;J<H&&J<=W;J++){let D=this.idx(n,J),$e=s.CP*He[D]*l[D]*f[D];Ee[D]=$e,S+=$e+c[D],R+=(He[D]+Ye[D])*l[D]*f[D],ht+=$e}B+=S,Ve+=R*this.toFloor[n]*Xe[n]*lt[n];for(let J=H;J<=W;J++){let D=this.idx(n,J);ge[D]+=S*_e[D]}let M=this.idx(n,W),L=S*this.toFloor[n],Y=L*Xe[n],_=L-Y,V=Math.min(_,this.rustCol[n]*s.dirShare/4);_-=V,Se[M]+=4*V*s.dirRelease,b.bifRed[n]=4*V*(1-s.dirRelease),b.bifOx[n]=Math.max(0,this.rustCol[n]-4*V),U+=b.bifRed[n],F+=b.bifOx[n],q+=4*V,ge[M]+=_,b.orgBur[n]=Y,vt+=Y}Ve+=Ke;let ne=Math.max(1,this.ventCells.length);for(let n of this.ventCells)Se[n]+=e.ventFe*j/ne;this.riverCells.forEach((n,S)=>Se[n]+=e.riverFe*j*this.riverShare[S]);let se=this.lin,Ae=this.gasK,Ue=this.dem,ye=this.ferroMax,Ie=this.fesK;Ae.fill(0),ye.fill(0);for(let n=0;n<r;n++){if(se[n]=0,Ue[n]=0,Ie[n]=0,!d[n])continue;let S=l[n];se[n]=S/t*m[n]+Ee[n]-Se[n]/4,Ue[n]=ge[n]+2*s.moxRate*X[n]*S+2*s.hsOxRate*ae[n]*S,Ie[n]=s.fesRate*ae[n]*S}for(let n=0;n<p;n++){let S=this.idx(n,0);Ae[S]=y*C[n],se[S]+=y*C[n]*T;for(let R=0;R<H&&R<=this.kb[n];R++){let W=this.idx(n,R),M=this.light[R]*e.lightFactor*C[n];ye[W]=s.muFerro*e.ferro*M*G*(f[W]/(f[W]+s.kP))*l[W]}}let he=this.mE,Oe=this.res,Ze=this.jd,We=s.kO2,Ne=Ge,be=this.Tdiag,ct=(n,S,R)=>{this.transportOut(n,S);let W=0;for(let M=0;M<r;M++){if(!d[M]){S[M]=0,R&&(Ze[M]=0);continue}let L=n[M],Y=Math.sqrt(L*L+Ne*Ne),_=.5*(L+Y),V=2*(Y-L),J=Ft(_),D=Ft(V),$e=J/(J+We),xs=D/(D+s.kFe),ks=D/(D+.5),$t=V-s.feSat,Ta=Math.sqrt($t*$t+1),vs=.5*($t+Ta),Dt=l[M],$a=s.feSatRate*Dt/4,Ms=Ae[M]*_+Ue[M]*$e-ye[M]*xs-Ie[M]/4*ks-$a*vs;if(S[M]+=Dt/t*L+Ms-se[M],R){let jt=.5*(1+L/Y),La=-4*(1-jt),Cs=Ra(_)*jt,Pa=Ra(V)*La;Ze[M]=Ae[M]*jt+Ue[M]*We/((J+We)*(J+We))*Cs-ye[M]*s.kFe/((D+s.kFe)*(D+s.kFe))*Pa-Ie[M]/4*(.5/((D+.5)*(D+.5)))*Pa-$a*.5*(1+$t/Ta)*La,this.rsc[M]=1/(be[M]+Dt/t+Ze[M])}let Fa=S[M]*this.rsc[M];W+=Fa*Fa}return W},Je=this.tmp,we=this.eTry,Mt=this.res2,ce=0,Qe=ct(m,Oe,!0);for(let n=0;n<12;n++){ce=n+1,he.load(this.T.a);for(let M=0;M<r;M++)d[M]&&(he.add(M,M,l[M]/t+Ze[M]),Oe[M]=-Oe[M]);he.factor(),he.solve(Oe,Je);let S=1,R=0;for(let M=0;M<8;M++){for(let L=0;L<r;L++)we[L]=d[L]?m[L]+S*Je[L]:0;if(R=ct(we,Mt,!1),R<(1-1e-4*S)*Qe)break;S*=.5}let W=0;for(let M=0;M<r;M++){if(!d[M])continue;let L=we[M]-m[M],Y=Math.abs(L)/(Math.abs(we[M])+.001);Y>W&&(W=Y),m[M]=we[M]}if(W<1e-6||R<1e-20*r)break;Qe=ct(m,Oe,!0)}this.newtonIters=ce;for(let n=0;n<r;n++)d[n]||(m[n]=0);this.views();let dt=this.O2,Te=this.Fe;O.fill(0);for(let n=0;n<p;n++)O[this.idx(n,0)]=y*C[n];let et=this.tmp;he.solve(O,et);let Ct=0,St=0;for(let n=0;n<p;n++){let S=this.idx(n,0),R=Math.sqrt(m[S]*m[S]+Ne*Ne),W=.5*(1+m[S]/R);Ct+=y*C[n]*Math.max(0,1-W*et[S]),St+=y*C[n]*(dt[S]-T)}let At=this.srcM,Ot=this.srcH;At.fill(0),Ot.fill(0),b.methane.fill(0),b.seepCH4.fill(0);let de=this.fOx,da=0,ua=0,fa=0,pa=0,ma=0;for(let n=0;n<r;n++){if(de[n]=0,!d[n])continue;let S=Ft(dt[n]),R=S/(S+We);de[n]=R;let W=ge[n]*R,M=ge[n]-W,L=M*$,Y=M-L;Ot[n]+=L/2,At[n]+=Y/2,b.methane[n]=Y/2/l[n];let _=K(n);n===this.idx(_,this.kb[_])&&(b.seepCH4[_]=Y/2),da+=W,ua+=L/2,fa+=Y/2;let V=Ft(Te[n]);this.feX[n]=V;let J=ye[n]*(V/(V+s.kFe));pa+=J,c[n]+=.5*(J-c[n]),b.prodFerro[n]=J/l[n],b.prodCyano[n]=Ee[n]/l[n];let D=Te[n]-s.feSat,$e=s.feSatRate*l[n]/4*4*.5*(D+Math.sqrt(D*D+1));ma+=$e,b.bifRed[_]+=$e,x[n]+=.5*(R-x[n])}for(let n of this.ventCells)At[n]+=e.ventCH4*j/ne;let ga=this.res;this.transportOut(Te,ga);let ya=0,ba=0,wa=this.rustCol;wa.fill(0);for(let n=0;n<r;n++){if(this.rustCell[n]=0,b.rust[n]=0,!d[n])continue;let S=l[n],R=this.feX[n],W=4*ye[n]*(R/(R+s.kFe)),M=Te[n]-s.feSat,L=s.feSatRate*S*.5*(M+Math.sqrt(M*M+1)),Y=Ie[n]*(R/(R+.5)),_=Se[n]-ga[n]-S/t*(Te[n]-je[n])-W-L-Y;_<0&&(ba-=_,_=0),ya+=_;let V=_+W;this.rustCell[n]=V,b.rust[n]=V/S,wa[K(n)]+=V}let tt=this.mM;tt.load(this.T.a);for(let n=0;n<r;n++){if(O[n]=0,!d[n])continue;let S=l[n];tt.add(n,n,S/t+(de[n]*s.moxRate+(1-de[n])*E)*S),O[n]=S/t*g[n]+At[n]}for(let n=0;n<p;n++){let S=this.idx(n,0);tt.add(S,S,y*C[n]),O[S]+=y*C[n]*P}tt.factor(),tt.solve(O,g);let xa=0,ka=0,va=0;for(let n=0;n<r;n++){if((!d[n]||g[n]<0)&&(g[n]=0),!d[n])continue;let S=de[n]*s.moxRate*g[n]*l[n],R=(1-de[n])*E*g[n]*l[n];Ot[n]+=R,xa+=S,ka+=R,va+=2*de[n]*s.moxRate*(X[n]-g[n])*l[n]}let Ma=0;for(let n=0;n<p;n++)Ma+=y*C[n]*(g[this.idx(n,0)]-P);O.fill(0);for(let n=0;n<p;n++)O[this.idx(n,0)]=y*C[n];tt.solve(O,et);let Ca=0;for(let n=0;n<p;n++)Ca+=y*C[n]*Math.max(0,1-et[this.idx(n,0)]);let Tt=this.mH;Tt.load(this.T.a);for(let n=0;n<r;n++){if(O[n]=0,!d[n])continue;let S=l[n],R=this.feX[n]/(this.feX[n]+.5);Tt.add(n,n,S/t+(de[n]*s.hsOxRate+R*s.fesRate)*S),O[n]=S/t*w[n]+Ot[n]}Tt.factor(),Tt.solve(O,w);let Sa=0,Aa=0,Oa=0;b.pyrite.fill(0);for(let n=0;n<r;n++){if((!d[n]||w[n]<0)&&(w[n]=0),!d[n])continue;let S=this.feX[n]/(this.feX[n]+.5),R=de[n]*s.hsOxRate*w[n]*l[n],W=S*s.fesRate*w[n]*l[n];b.pyrite[K(n)]+=W,Sa+=R,Aa+=W,Oa+=Math.abs(de[n]*s.hsOxRate*(ae[n]-w[n])*l[n])+Math.abs(S*s.fesRate*(ae[n]-w[n])*l[n])}return{o2ToAir:St*u,o2Slope:Ct*s.henryO2*u,ch4ToAir:Ma*u,ch4Slope:Ca*s.henryCH4*u,prodCyano:ht*u,prodFerro:pa*u,exportC:B*u,orgBur:vt*u,aerobic:da*u,sulfRed:ua*u,methProd:fa*u,mox:xa*u,aom:ka*u,sulfOx:Sa*u,pyrite:Aa*u,feOx:ya*u,bifOx:F*u,bifRed:(ma+U)*u,dir:q*u,pBur:Ve*u,pScav:Ke*u,artefact:ba*u,lag:(Math.abs(va)+Oa)*u,iters:ce}}meanBelow(e,t){let s=0,o=0;for(let i=0;i<this.NX;i++)for(let r=0;r<=this.kb[i];r++){if(this.zc[r]<t)continue;let l=this.idx(i,r);s+=e[l]*this.vol[l],o+=this.vol[l]}return o>0?s/o:0}maxSurface(e,t=this.NX){let s=0;for(let o=0;o<t;o++)s=Math.max(s,e[this.idx(o,0)],e[this.idx(o,1)]);return s}saveState(e={}){for(let t of _t)(!e[t]||e[t].length!==this[t].length)&&(e[t]=new Float64Array(this[t].length)),e[t].set(this[t]);return e}loadState(e){for(let t of _t)this[t].set(e[t]);this.views()}snapshot(){return{P:Array.from(this.P),E:Array.from(this.E),M:Array.from(this.M),H:Array.from(this.H),theta:Array.from(this.theta),cf:Array.from(this.cf),rustCol:Array.from(this.rustCol),rustCell:Array.from(this.rustCell)}}restore(e){for(let t of _t)this[t].set(e[t]);this.views()}};var Fe={bands:18,S0:1361,A:205,B:2.09,D:.45,albedoFree:.3,albedoSlope:.078,albedoIce:.62,dustDarkening:.2,iceAt:-10,iceWidth:3,heatCap:4},Ia=a=>.5*(3*a*a-1);function Xt(a){return 5.35*Math.log(Math.max(1e-7,a)/28e-5)}function Yt(a){let e=t=>2*Math.log(1+Math.max(0,t)/.5);return e(a)-e(.7)}function Vt(a,e){let t=a/Math.max(1e-9,e),s=Math.min(1,Math.max(0,(t-.1)/.2));return s*s*(3-2*s)}function Ts(a,e){return-6*Vt(a,e)}function Ht(a,e,t){return Xt(a)+Yt(e)+Ts(t,a)}var Rt=class{constructor(){let e=Fe.bands;this.n=e,this.x=new Float64Array(e),this.s=new Float64Array(e),this.T=new Float64Array(e).fill(15),this.alpha=new Float64Array(e),this.cUp=new Float64Array(e);for(let t=0;t<e;t++){this.x[t]=(t+.5)/e,this.s[t]=1-.482*Ia(this.x[t]);let s=(t+1)/e;this.cUp[t]=t<e-1?Fe.D*(1-s*s)*e*e:0}this._a=new Float64Array(e),this._b=new Float64Array(e),this._c=new Float64Array(e),this._d=new Float64Array(e),this.meanT=15,this.iceLat=90,this.iceFrac=0,this.dust=0}albedoAt(e,t){let s=Fe,o=s.albedoFree+s.albedoSlope*Ia(this.x[e]),i=s.albedoIce-s.dustDarkening*this.dust,r=.5*(1-Math.tanh((t-s.iceAt)/s.iceWidth));return o+(i-o)*r}weather(e){this.iceLat<2?this.dust=Math.min(1,this.dust+e/2e7):this.dust=Math.max(0,this.dust-e/1e6)}settle(e,t,s=40){let o=Fe,i=this.n,r=o.S0/4*e,{T:l,s:d,alpha:f,cUp:m,_a:g,_b:w,_c:x,_d:c}=this;for(let u=0;u<s;u++){for(let p=0;p<i;p++)f[p]=this.albedoAt(p,l[p]);for(let p=0;p<i;p++){let C=p>0?m[p-1]:0,y=m[p];g[p]=-C,x[p]=-y,w[p]=o.heatCap+o.B+C+y,c[p]=o.heatCap*l[p]+r*d[p]*(1-f[p])-o.A+t}for(let p=1;p<i;p++){let C=g[p]/w[p-1];w[p]-=C*x[p-1],c[p]-=C*c[p-1]}let b=0,k=c[i-1]/w[i-1];b=Math.max(b,Math.abs(k-l[i-1])),l[i-1]=k;for(let p=i-2;p>=0;p--)k=(c[p]-x[p]*l[p+1])/w[p],b=Math.max(b,Math.abs(k-l[p])),l[p]=k;if(b<.002&&u>2)break}this.summarise()}summarise(){let e=this.n,t=0;for(let i=0;i<e;i++)t+=this.T[i];this.meanT=t/e;let s=Fe.iceAt,o=1;if(this.T[0]<s)o=0;else for(let i=1;i<e;i++)if(this.T[i]<s){let r=(this.T[i-1]-s)/(this.T[i-1]-this.T[i]);o=this.x[i-1]+r*(this.x[i]-this.x[i-1]);break}this.iceFrac=1-o,this.iceLat=Math.asin(Math.min(1,o))*180/Math.PI}tempAt(e){let s=Math.sin(Math.abs(e)*Math.PI/180)*this.n-.5,o=Math.max(0,Math.min(this.n-2,Math.floor(s))),i=Math.max(0,Math.min(1,s-o));return this.T[o]*(1-i)+this.T[o+1]*i}snapshot(){return Array.from(this.T)}restore(e){for(let t=0;t<this.n;t++)this.T[t]=e[t];this.summarise()}};var N={moles:18e19,PAL:378e17,escape:37e-6,kOmega:1e15,kEscapeO2:1e14,abioticO2:1e9,abioticCH4:1e10},$s={skipped:0},ft=[.003,-.1655,3.2305,-25.8343,71.5398],xe=a=>(((ft[0]*a+ft[1])*a+ft[2])*a+ft[3])*a+ft[4],pt=10.5,Fs=(xe(pt+.01)-xe(pt-.01))/.02,mt=(()=>{let a=12;for(let e=12;e<18;e+=.001)xe(e)>xe(a)&&(a=e);return a})(),Ls=(xe(mt-.5)-xe(mt-1.5))/1;function Ps(a,e=!0){return a<pt?xe(pt)+Fs*(a-pt):!e&&a>mt-1?xe(mt-1)+Ls*(a-(mt-1)):xe(Math.min(a,20))}function Rs(a,e=!0){return Math.pow(10,Ps(Math.log10(Math.max(a,1)),e))}function Wa(a){if(a<=1e-7)return 0;let e=Math.log10(a);return Math.min(1,Math.max(0,(e+6)/6))**1.6}function Na(a,e,t){let o=Rs(a,t.shield)*Math.pow(Math.max(e,0),.7),i=a/(a+N.kOmega),r=t.reductant*i,l=t.escapeOn?t.methanogens??1:1,d=.5*t.reductant*(1-i)*l,f=t.reductant*(1-i)*(1-l),m=t.escapeOn?N.escape*e:0,g=m*(a/(a+N.kEscapeO2)),w=a/N.PAL,x=t.weathering*Math.sqrt(Math.max(0,w)),c=t.backlog?t.backlog*a/(a+t.backlogHalf):0,u=t.oceanO2-t.oceanO2Slope*(a/N.moles),b=t.oceanCH4-t.oceanCH4Slope*(e/N.moles);return{photo:o,volcO2:r,volcCH4:d,volcH2:f,esc:m,escO2:g,weath:x,weathB:c,seaO2:u,seaCH4:b,dO:N.abioticO2+u-r-o-g-x-c,dM:N.abioticCH4+b+d-.5*o-m}}var Hs=Math.log(1e3),Es=Math.log(N.moles),Is=Math.log(1e6),Ws=Math.log(N.moles*.05);function Ns(a,e,t,s){let o=[0,0],i=[0,0],r=[0,0],l=[0,0],d=(x,c,u)=>{let b=Math.exp(x),k=Math.exp(c),p=Na(b,k,t);return u[0]=1-a/b-s*p.dO/b,u[1]=1-e/k-s*p.dM/k,u[0]*u[0]+u[1]*u[1]},f=(x,c)=>[Math.min(Math.max(x,Hs),Es),Math.min(Math.max(c,Is),Ws)],m=Math.log(a),g=Math.log(e),w=d(m,g,o);for(let x=0;x<60;x++){if(w<1e-22)return[Math.exp(m),Math.exp(g)];let c=1e-7;d(m+c,g,i),d(m,g+c,r);let u=(i[0]-o[0])/c,b=(i[1]-o[1])/c,k=(r[0]-o[0])/c,p=(r[1]-o[1])/c,C=u*p-k*b;if(!isFinite(C)||Math.abs(C)<1e-300)return null;let y=-(o[0]*p-o[1]*k)/C,T=-(u*o[1]-b*o[0])/C,P=Math.max(Math.abs(y),Math.abs(T));P>2&&(y*=2/P,T*=2/P);let G=1,z=!1;for(let $=0;$<30;$++){let[E,j]=f(m+G*y,g+G*T),H=d(E,j,l);if(H<w*(1-1e-4*G)||H<1e-22){m=E,g=j,w=H,o[0]=l[0],o[1]=l[1],z=!0;break}G*=.5}if(!z)return w<1e-14?[Math.exp(m),Math.exp(g)]:null;if(G*P<1e-11)return w<1e-14?[Math.exp(m),Math.exp(g)]:null}return w<1e-14?[Math.exp(m),Math.exp(g)]:null}function za(a,e,t,s=16){let o=Math.min(Math.max(a.O2,1e6),N.moles),i=Math.min(Math.max(a.CH4,1e6),N.moles*.05),r=t/s,l=t,d=r,f=0;for(;l>r*1e-9&&f++<2e4;){let m=Math.min(d,l),g=Ns(o,i,e,m);g?(o=g[0],i=g[1],l-=m,d=Math.min(r,m*2)):m>r*1e-7?d=m/4:($s.skipped++,l-=m)}return a.O2=o,a.CH4=i,Na(o,i,e)}function gt(a){return 1/(1+.4*(Math.max(0,a)/4.57))}function Kt(a){return 1+.75*Math.pow(Math.max(0,a)/3,1.5)}function Ga(a){return .2+.8/(1+Math.exp((a-2.55)/.12))}function Ut(a){return .25+.6/(1+Math.exp((a-2.5)/.15))}function qa(a){let e=1/(1+Math.exp((a-2.44)/.01)),t=1/(1+Math.exp((2.23-a)/.01));return e*t}var yt={cyanoAge:2.9,ferrotrophs:!0,reductants:1,ventIron:1,weatheringP:1,volcanicCO2:1,continents:1,ozoneShield:!0,hydrogenEscape:!0,events:!0,lull:!0},Ba={cyanoAge:{min:0,max:3,step:.05},reductants:{min:.3,max:2,step:.05},ventIron:{min:0,max:3,step:.05},weatheringP:{min:.2,max:3,step:.05},volcanicCO2:{min:.3,max:3,step:.05},continents:{min:.3,max:1.5,step:.05}},bt={real:{label:"Real Earth",blurb:"Best guesses for the young Earth: cyanobacteria from 2.9 Ga, the real eruptions, and the quiet spell in volcanism from 2.45 to 2.2 Ga.",params:{}},noCyano:{label:"No cyanobacteria",blurb:"Nothing on Earth splits water to make oxygen. Iron-eating microbes are the only photosynthesisers.",params:{cyanoAge:0}},earlyCyano:{label:"Earlier cyanobacteria",blurb:"Cyanobacteria from the very start at 3.0 Ga. Does the air turn sooner?",params:{cyanoAge:3}},volcanoes:{label:"Gassier volcanoes",blurb:"Half again as much reducing gas from volcanoes and the hot crust.",params:{reductants:1.5}},noLull:{label:"Volcanoes never go quiet",blurb:"No magmatic lull: volcanoes and ridges keep their pace from 2.45 to 2.2 Ga.",params:{lull:!1}},noLips:{label:"No great eruptions",blurb:"No large igneous provinces: no floods of lava, no fresh basalt to weather.",params:{events:!1}}},v={startAge:3,endAge:1.8,stepMyr:.5,spinUp:60,cyanoSpread:.06,volcCO2:3e13,weathK:1e13,weathT0:-5,weathTe:13.7,weathCO2:.3,pRef:.01,seafloorK:4e12,seafloorCO2:.23,carbWeathK:8e12,carbonCap:18e19,oceanCarbon:9,riverP:5e10,riverPRef:1e13,oxidativeP:1,reductant:1e13,subaerialOxidised:.5,crustHalf:15e21,metaShare:.5,ventFe:1e13,ventCH4:1e11,riverFe:5e11,oxWeath:15e12,kerogenShare:.7,pyriteShare:.25,backlog0:15e18,backlogRate:2e-8,backlogHalf:3e-5,backlogP:.08,volcS:6e11,evapK:15e11,oceanVolume:134e16,lipRate:1/50,lullDepth:.5};var zs=Kt(v.startAge),Zt=["CH4","O2"],Da=1e-5*N.PAL,Gs=Ut(v.startAge),qs=v.oceanVolume*.001,Le=(a,e,t)=>Math.min(t,Math.max(e,a)),Jt=a=>{let e=Le(a,0,1);return e*e*(3-2*e)},Bs=[{age:2.775,size:1.2,name:"Mount Roe (Fortescue)"},{age:2.72,size:1,name:"Ventersdorp"},{age:2.575,size:.8,name:"Great Dyke"},{age:2.505,size:.8,name:"Mistassini"},{age:2.46,size:1.4,name:"Matachewan"},{age:2.426,size:1.4,name:"Ongeluk"},{age:2.41,size:.8,name:"Widgiemooltha"},{age:2.367,size:.7,name:"Bangalore"},{age:2.217,size:1.2,name:"Nipissing"},{age:2.11,size:.8,name:"Marathon"},{age:2.055,size:1.4,name:"Bushveld"},{age:1.98,size:.8,name:"Jatulian"},{age:1.88,size:1.6,name:"Circum-Superior"}];function Ds(a){if(a==="earth")return Bs.map(o=>({...o}));let e=new ut(`${a}:lips`),t=[],s=v.startAge;for(;s-=-Math.log(1-e.float())/v.lipRate/1e3,!(s<v.endAge);){let o=e.float();t.push({age:s,size:.4+1.2*o*o})}return t}function js(a,e){let t=0,s=0;for(let o of a)for(let i of o){let r=(i.age-e)*1e3;r<0||r>60||(r<1&&(t+=i.size),s+=i.size*Math.exp(-r/8))}return{pulse:t,basalt:s}}var Xa={carbonate:{label:"Carbonate platform",color:"#c9c2a8"},shale:{label:"Black shale",color:"#3b3a3f"},bifOx:{label:"Banded iron (oxide)",color:"#a5402c"},bifRed:{label:"Iron formation (siderite, greenalite)",color:"#6e7a52"},pyrite:{label:"Pyritic shale",color:"#8b8455"},diamictite:{label:"Glacial diamictite",color:"#9aa3ad"},capCarbonate:{label:"Cap carbonate",color:"#e2d6b5"},evaporite:{label:"Gypsum (evaporite)",color:"#efe9e1"}},at=class{constructor({seed:e="earth",scenario:t="real",params:s={}}={}){this.ocean=new Pt,this.climate=new Rt,this.climateStart=new Float64Array(this.climate.n),this.climateMid=new Float64Array(this.climate.n),this.reset({seed:e,scenario:t,params:s})}reset({seed:e=this.seed,scenario:t=this.scenario,params:s={}}={}){this.seed=String(e),this.scenario=bt[t]?t:"real",this.params={...yt,...bt[this.scenario].params,...s},this.rngRecord=new ut(`${this.seed}:record`),this.lips=Ds(this.seed),this.injected=[],this.kicks={O2:0,CH4:0,CO2:0,cold:0},this.age=v.startAge,this.step=0,this.air={O2:1e-13*N.moles,CH4:5e-4*N.moles},this.pCO2=.02,this.SO4=2,this.crustOx=0,this.mifMemory=1,this.backlog=v.backlog0,this.slope={CH4:0,O2:0},this.history=[],this.core=[],this.log=[],this.flags={cyano:!1,goe:!1,snowball:!1,lastThaw:-1,lull:!1,glacial:!1,methaneLow:!1},this.ocean.reset(),this.climate.T.fill(20),this.climate.dust=0,this.climate.summarise();for(let o=0;o<v.spinUp;o++)this.advance(!0);this.crustOx=0,this.record()}setParams(e){for(let[t,s]of Object.entries(e))t in yt&&(this.params[t]=s)}get done(){return this.age<=v.endAge+1e-9}run(e=1){for(let t=0;t<e&&!this.done;t++)this.advance(!1),this.record()}forcing(e){let t=this.params,s=Kt(e)/zs,o=Le(Ga(e)*t.continents,.02,1.5),i=Ut(e),r=t.lull?qa(e):0;return{lum:gt(e),hf:s,land:o,sub:i,lull:r,quiet:1-v.lullDepth*r,subFactor:(1-v.subaerialOxidised*i)/(1-v.subaerialOxidised*Gs)}}cyanoAt(e){let t=this.params.cyanoAge;return t>0?Jt((t-e)/v.cyanoSpread):0}inject(e){let t=this.air.O2/N.PAL;switch(e){case"lip":this.injected.push({age:this.age,size:1.6}),this.note("lab","You set off a flood of lava (a large igneous province).");break;case"oxygen":this.air.O2=Math.max(this.air.O2,.01*N.PAL)+.01*N.PAL,this.note("lab","You puffed oxygen into the air: about 2 % of today’s level.");break;case"methane":this.air.CH4+=.001*N.moles,this.note("lab","You released 1,000 ppm of methane.");break;case"co2":this.pCO2+=.05,this.note("lab","You added 0.05 bar of CO₂.");break;case"freeze":this.climate.T.fill(-40),this.climate.summarise(),this.note("lab","You froze the planet over.");break;case"cyano":this.params.cyanoAge>this.age||(this.params.cyanoAge=this.age+v.cyanoSpread),this.note("lab","Cyanobacteria arrive.");break;default:break}return t}note(e,t){this.log.push({age:this.age,step:this.step,kind:e,text:t})}advance(e){let t=this.params,s=this.age,o=v.stepMyr*1e6,i=this.forcing(s),r=e||!t.events?{pulse:0,basalt:0}:js([this.lips,this.injected],s),l=this.climate,d=Math.max(this.pCO2,1e-6),f=1+.25*r.basalt,m=1/(1+this.crustOx/v.crustHalf),g=v.reductant*t.reductants*((1-v.metaShare)*i.hf*i.hf*i.subFactor+v.metaShare*i.hf*m)*(1+.2*r.pulse),w=v.volcCO2*t.volcanicCO2*i.hf*i.quiet*(1+.15*r.pulse),x=v.volcS*i.hf*i.quiet*(1+.3*r.pulse),c={O2:this.air.O2,CH4:this.air.CH4},u=Math.max(this.SO4,1e-4),b=this.climateStart;b.set(l.T);let k={pO2:0,pCH4:0,SO4:u,ventFe:v.ventFe*t.ventIron*i.hf*i.hf*i.quiet*(1+.3*r.pulse),ventCH4:v.ventCH4*i.hf,riverP:0,riverFe:0,iceFrac:0,tempFactor:1,lightFactor:1,cyano:this.cyanoAt(s),ferro:t.ferrotrophs?1:0},p=(q,U)=>{U&&(l.restore(b),l.settle(i.lum,Ht(d,q.CH4/N.moles*1e6,q.CH4/N.moles)));let F=l.iceFrac,B=1-F,ne=_a(l),se=Math.exp((ne-v.weathT0)/v.weathTe),Ae=v.weathK*i.land*f*(d/v.pRef)**v.weathCO2*se*B,Ue=v.seafloorK*i.hf*(d/v.pRef)**v.seafloorCO2,ye=v.carbWeathK*i.land*se*B,Ie=v.oxWeath*i.land*B,he=q.O2/N.PAL;k.pO2=q.O2/N.moles,k.pCH4=q.CH4/N.moles,k.SO4=q.SO4;let Oe=v.backlogRate*this.backlog*i.land*B,Ze=Oe*he/(he+v.backlogHalf);k.riverP=t.weatheringP*(v.riverP*(2/12*(Ae/v.riverPRef)+5/12*(ye/v.carbWeathK)+5/12*v.oxidativeP*i.land*B*Math.sqrt(he))+v.backlogP*Ze);let We=1-Jt((Math.log10(Math.max(he,1e-12))+5)/2);k.riverFe=v.riverFe*i.land*B*(Ae/v.riverPRef)*We;let Ne=Vt(k.pCH4,d);k.lightFactor=1-.3*Ne,k.iceFrac=F,k.tempFactor=Le(2**((ne-15)/10),.25,3);let be=this.ocean.solve(k,o),ct={shield:t.ozoneShield,escapeOn:t.hydrogenEscape,reductant:g,methanogens:Le(B/.1,0,1),weathering:Ie,backlog:3.75*Oe,backlogHalf:v.backlogHalf*N.PAL,...ja("O2",be.o2ToAir,be.o2Slope,k.pO2),...ja("CH4",be.ch4ToAir,be.ch4Slope,k.pCH4)},Je={O2:c.O2,CH4:c.CH4},we=za(Je,ct,o),Mt=v.pyriteShare*we.weath/2.25+2*we.weathB/3.75,ce=Math.max(q.SO4,1e-4),Qe=v.evapK*i.land*(ce/28e3)**2,dt=be.pyrite/ce*(400/(400+ce)),Te=2*Qe/ce,et=be.pyrite+dt*(u-ce),Ct=Qe+Te*(u-ce),St=Math.max(1e-4,u+o*(x+Mt-et-Ct)/(qs+o*(dt+Te)));return{O2:Je.O2,CH4:Je.CH4,SO4:St,oc:be,ar:we,W:Ae,Wsf:Ue,Wcarb:ye,ice:F,tFree:ne,haze:Ne,Spyr:Mt,evap:Qe}},C=Math.log10,y=this.slope,T=(q,U)=>q==="O2"?.02:U.CH4>1e-6*N.moles?.01:.05,P=(q,U)=>{let F=Math.abs(C(U.SO4/q.SO4))/.02;for(let B of Zt)F=Math.max(F,Math.abs(C(U[B]/q[B]))/T(B,q));return F},G=l.iceFrac,z={O2:c.O2,CH4:c.CH4,SO4:u},$=p(z,!1),E=P(z,$),j=[{g:z,r:$,err:E}],H={CH4:-1/0,O2:-1/0},O={CH4:1/0,O2:1/0};for(;E>1&&j.length<10;){let q={SO4:$.SO4};for(let F of Zt){let B=C(z[F]),ne=C($[F])-B;if(F==="O2"&&z.O2>Da!=$.O2>Da){q.O2=$.O2,H.O2=-1/0,O.O2=1/0;continue}ne>0?H[F]=Math.max(H[F],B):O[F]=Math.min(O[F],B),H[F]>=O[F]&&(H[F]=-1/0,O[F]=1/0);let se=B+Le(-ne/(y[F]-1),-.7,.7);(se<=H[F]||se>=O[F])&&isFinite(H[F])&&isFinite(O[F])&&(se=.5*(H[F]+O[F])),q[F]=10**se}let U={g:z,r:$};z=q,$=p(z,!0),E=P(z,$),j.push({g:z,r:$,err:E}),this.debug&&this.debug(j.length,z,$,E,y);for(let F of Zt){let B=C(z[F]/U.g[F]);Math.abs(B)>.001&&(y[F]=Le(C($[F]/U.r[F])/B,-60,.9))}}if(this.coupleIters=j.length,E>1){let q=j.filter(F=>F.r.ice>.9!=G>.9),U=(q.length?q:j).reduce((F,B)=>B.err<F.err?B:F);U.r!==$&&($=p(U.g,!0))}let{oc:K,ar:X,W:ae,Wsf:je,Wcarb:_e,haze:Xe,tFree:lt,Spyr:He,evap:Ye}=$;this.air.O2=$.O2,this.air.CH4=$.CH4,this.SO4=$.SO4,e||(this.crustOx+=(2*X.esc-X.escO2+X.volcH2)*o,this.backlog=Math.max(0,this.backlog-X.weathB/3.75*o));let me=1-$.ice,Ee=v.kerogenShare*X.weath,ht=v.carbonCap*(1+v.oceanCarbon*me);e&&(ht*=.05);let Ve=this.air.CH4/N.moles*1e6,Ke=this.climateMid;Ke.set(l.T);let ge=q=>{l.restore(Ke),l.settle(i.lum,Ht(q,Ve,this.air.CH4/N.moles))},Se=q=>{let U=Math.exp(q);ge(U);let F=_a(l),B=v.weathK*i.land*f*(U/v.pRef)**v.weathCO2*Math.exp((F-v.weathT0)/v.weathTe)*(1-l.iceFrac),ne=v.seafloorK*i.hf*(U/v.pRef)**v.seafloorCO2;return U-d-o*(w+Ee-K.orgBur-B-ne)/ht};this.pCO2=_s(Se,Math.log(d),Math.log(1e-5),Math.log(10));let vt=Ht(this.pCO2,Ve,this.air.CH4/N.moles);ge(this.pCO2),e||l.weather(o),this.now={f:i,ev:r,W:ae,Wsf:je,Wcarb:_e,V:w,Worg:Ee,Rv:g,riverP:k.riverP,riverFe:k.riverFe,env:k,oc:K,ar:X,haze:Xe,F:vt,Svolc:x,Spyr:He,evap:Ye,tFree:lt,crustFactor:m},e||(this.age=Math.max(v.endAge,s-v.stepMyr/1e3),this.step++)}record(){let e=this.now,t=e.oc,o=this.air.O2/N.PAL,i=Math.log10(Math.max(o,1e-14)),r=1-Jt(i+6),l=15;this.mifMemory+=(r-this.mifMemory)*(1-Math.exp(-v.stepMyr/l));let d=Qt(this.rngRecord),f=r*(2+2.5*d)+(1-r)*this.mifMemory*(.6+.4*d)+.08*Qt(this.rngRecord),m=e.V+e.Wcarb+e.Worg,g=(-5*e.V-25*e.Worg)/Math.max(m,1),w=e.W+e.Wsf+e.Wcarb,x=t.orgBur/Math.max(t.orgBur+w,1),c=g+28*x+.4*Qt(this.rngRecord),u=t.o2ToAir-2*t.ch4ToAir,b=this.air.CH4/N.moles*1e6,k=this.climate,p={step:this.step,age:this.age,pal:o,ch4:b,co2:this.pCO2,T:k.meanT,iceLat:k.iceLat,so4:this.SO4,X:u,Rv:e.Rv,o2ToAir:t.o2ToAir,ch4ToAir:t.ch4ToAir,orgBur:t.orgBur,bifOx:t.bifOx,bifRed:t.bifRed,pyrite:t.pyrite,prodCyano:t.prodCyano,prodFerro:t.prodFerro,riverP:e.riverP,W:e.W,weath:e.ar.weath,esc:e.ar.esc,photo:e.ar.photo,deepFe:this.ocean.meanBelow(this.ocean.Fe,500),deepO2:this.ocean.meanBelow(this.ocean.O2,500),surfO2:this.ocean.maxSurface(this.ocean.O2),d13C:c,d33S:f,mif:r,fOrg:x,haze:e.haze,ozone:Wa(o),cyano:this.cyanoAt(this.age),lip:e.ev.pulse>0?1:0,lull:e.f.lull,crust:e.crustFactor,backlog:this.backlog/v.backlog0,weathB:e.ar.weathB,lith:""};p.lith=this.lithology(p),this.history.push(p),this.layCore(p),this.watch(p)}lithology(e){return e.iceLat<40?"diamictite":this.flags.lastThaw>=0&&this.step-this.flags.lastThaw<=2?"capCarbonate":e.bifOx>2e12?"bifOx":e.bifRed>2e12?"bifRed":e.so4>3e3?"evaporite":e.pyrite>15e11?"pyrite":e.orgBur>6e12&&e.deepO2<1?"shale":"carbonate"}layCore(e){let t=this.core[this.core.length-1];t&&t.lith===e.lith?(t.bottom=e.age,t.steps++):this.core.push({lith:e.lith,top:e.age+v.stepMyr/1e3,bottom:e.age,steps:1})}watch(e){let t=this.flags,s=v.stepMyr/1e3;for(let i of this.lips){if(i.age<=e.age||i.age>e.age+s)continue;let r=i.name?`the ${i.name} large igneous province`:"a large igneous province",l=t.lips?"":" For a million years it breathes out CO₂ and reducing gas; then its fresh basalt weathers fast and draws CO₂ down.";t.lips=(t.lips??0)+1,this.note("volcano",`Lava floods out: ${r}.${l}`)}!t.lull&&e.lull>.5?(t.lull=!0,this.note("volcano","Volcanoes and mid-ocean ridges go quiet (the magmatic lull): less CO₂ and less iron come out of the Earth.")):t.lull&&e.lull<.5&&(t.lull=!1,this.note("volcano","Volcanoes wake up again: more CO₂ warms the planet.")),t.cyano&&!t.goe&&!t.methaneLow&&e.ch4<10&&(t.methaneLow=!0,this.note("air","Methane has fallen below 10 ppm: the methane greenhouse is fading and the planet is cooling.")),!t.cyano&&e.cyano>.5&&(t.cyano=!0,this.note("life","Cyanobacteria spread through the sunlit sea, splitting water and giving off oxygen.")),!t.goe&&e.pal>1e-5&&(t.goe=!0,t.goeAge=e.age,this.note("air","Oxygen in the air passes 1/100,000 of today’s level: the Great Oxygenation has begun.")),t.goe&&!t.mifGone&&e.mif<.05&&(t.mifGone=!0,this.note("rock","Sulfur isotopes lose their mass-independent signal: with oxygen in the air, all sulfur rains out as sulfate and the signal blends away.")),t.mifGone&&e.mif>.5&&(t.mifGone=!1,this.note("rock","The mass-independent sulfur signal is back: the air has lost its oxygen again."));let o=e.iceLat<5;o&&!t.snowball?(t.snowball=!0,t.glacial=!0,this.note("ice","Ice reaches the equator: a Snowball Earth.")):!o&&t.snowball&&e.iceLat>30&&(t.snowball=!1,t.glacial=e.iceLat<45,t.lastThaw=this.step,this.note("ice","The snowball melts: volcanic CO₂ has built up enough greenhouse to break the ice.")),!t.glacial&&e.iceLat<40?(t.glacial=!0,this.note("ice","Ice sheets spread to the middle latitudes: an ice age.")):t.glacial&&e.iceLat>45&&(t.glacial=!1,this.note("ice","The ice retreats towards the poles."))}geometry(){let e=this.ocean;return{NX:e.NX,NZ:e.NZ,dx:e.dx,zi:Array.from(e.zi),floor:Array.from(e.floor),kb:Array.from(e.kb),water:Array.from(e.water),bands:this.climate.n,lips:this.lips.map(t=>({...t}))}}frame(){let e=this.ocean,t=e.diag,s=o=>Float32Array.from(o);return{step:this.step,age:this.age,done:this.done,O2:s(e.O2),Fe:s(e.Fe),P:s(e.P),CH4:s(e.M),H2S:s(e.H),prod:s(t.prodCyano),ferro:s(t.prodFerro),rust:s(t.rust),open:s(e.openW),T:s(this.climate.T),iceLat:this.climate.iceLat,dust:this.climate.dust}}historySince(e){let t=this.history.length;for(;t>0&&this.history[t-1].step>e;)t--;return this.history.slice(t)}};function ja(a,e,t,s){let o=e+t*s;return o>=0||s<=0?{[`ocean${a}`]:Math.max(0,o),[`ocean${a}Slope`]:t}:{[`ocean${a}`]:0,[`ocean${a}Slope`]:-e/s}}function _s(a,e,t,s){let o=Le(e,t,s),i=a(o);if(i===0)return Math.exp(o);let r=i<0?1:-1,l=o,d=i,f=.05;for(;Math.sign(d)===Math.sign(i);){if(r>0&&l>=s||r<0&&l<=t)return Math.exp(l);o=l,i=d,l=Le(l+r*f,t,s),d=a(l),f*=2}let m=0;for(let g=0;g<60&&Math.abs(l-o)>1e-5;g++){let w=(o*d-l*i)/(d-i),x=a(w);if(x===0)return Math.exp(w);Math.sign(x)===Math.sign(d)?(l=w,d=x,m===-1&&(i/=2),m=-1):(o=w,i=x,m===1&&(d/=2),m=1)}return Math.exp(Math.abs(i)<Math.abs(d)?o:l)}function _a(a){let e=0,t=0;for(let s=0;s<a.n;s++)a.T[s]>Fe.iceAt&&(e+=a.T[s],t++);return t?e/t:Fe.iceAt}function Qt(a){let e=1-a.float();return Math.sqrt(-2*Math.log(e))*Math.cos(2*Math.PI*a.float())}var Ya=[2,6,20,1e3];function Va(a){let e=null,t=null,s=!1,o=1,i=null,r=0,l=0,d=()=>{let w=e.history,x=w.slice(r);r=w.length;let c=e.log.slice(l);l=e.log.length,a({type:"tick",frame:e.frame(),points:x,notes:c,core:e.core.slice(-3),params:e.params,running:s})},f=()=>{s=!1,i=null,t&&clearTimeout(t),t=null},m=()=>{if(t=null,!s)return;let w=Ya[o]??Ya[1],x=24,c=Date.now(),u=Math.max(1,Math.round(w/20)),b=0;for(;!e.done&&(b<u||w>=1e3&&Date.now()-c<x)&&!(i!==null&&e.age<=i+1e-9||(e.run(1),b++,Date.now()-c>x*2)););let k=i!==null&&e.age<=i+1e-9;(e.done||k)&&(s=!1,i=null),d();let p=w>=1e3?0:Math.max(0,1e3*Math.max(b,1)/w-(Date.now()-c));s?t=setTimeout(m,p):a({type:"paused",age:e.age,done:e.done})},g=()=>{e.done||(s=!0,t||(t=setTimeout(m,0)))};return function(x){try{switch(x.type){case"init":{f(),e=new at({seed:x.seed,scenario:x.scenario,params:x.params??{}}),r=0,l=0,a({type:"ready",geometry:e.geometry(),seed:e.seed,scenario:e.scenario,scenarios:bt,defaults:yt,ranges:Ba,lith:Xa,startAge:v.startAge,endAge:v.endAge,stepMyr:v.stepMyr}),d();break}case"play":if(!e)break;typeof x.speed=="number"&&(o=x.speed),i=null,g();break;case"speed":o=x.speed;break;case"pause":f(),e&&a({type:"paused",age:e.age,done:e.done});break;case"runTo":if(!e)break;if(typeof x.speed=="number"&&(o=x.speed),e.age<=x.age+1e-9){f(),a({type:"paused",age:e.age,done:e.done});break}i=x.age,g();break;case"step":if(!e)break;f(),e.run(x.n??1),d(),a({type:"paused",age:e.age,done:e.done});break;case"inject":if(!e)break;e.inject(x.kind),d();break;case"set":if(!e)break;e.setParams(x.patch),d();break;default:break}}catch(c){f(),a({type:"error",message:String(c&&c.stack?c.stack:c)})}}}var Xs=()=>new Promise(a=>setTimeout(a,0));async function ea(a,{seed:e="earth",scenario:t="real"}={}){let s=new at({seed:e,scenario:t}),o=Math.round((v.startAge-v.endAge)*1e3/v.stepMyr),i=Date.now();for(;!s.done;)s.run(1),Date.now()-i>40&&(a&&a({step:s.step,total:o,age:s.age}),await Xs(),i=Date.now());return ta(s.history,s.log)}var st=a=>a==null?"never":`${a.toFixed(2)} Ga`,Ka=a=>{if(a===0)return"0";let e=Math.floor(Math.log10(Math.abs(a)));return e>=-2&&e<4?a.toPrecision(2):`${(a/10**e).toFixed(1)}×10${Vs(e)}`},Ys={"-":"⁻",0:"⁰",1:"¹",2:"²",3:"³",4:"⁴",5:"⁵",6:"⁶",7:"⁷",8:"⁸",9:"⁹"},Vs=a=>String(a).replace(/./g,e=>Ys[e]??e);function ta(a){let e=p=>a.reduce((C,y)=>Math.abs(y.age-p)<Math.abs(C.age-p)?y:C),t=(p,C)=>a.filter(y=>y.age<=p&&y.age>=C),s=(p,C)=>p.reduce((y,T)=>y+T[C],0)/Math.max(1,p.length),o=a.find(p=>p.pal>1e-5),i=o?o.age:null,r=null;for(let p of a)p.mif>.5&&(r=p);let l=r&&r!==a[a.length-1]?r.age:null,d=a.reduce((p,C)=>C.bifOx>p.bifOx?C:p),f=t(2.45,2.22).reduce((p,C)=>C.iceLat<p.iceLat?C:p,{iceLat:90,age:null}),m=t(2.15,1.8).reduce((p,C)=>C.iceLat<p.iceLat?C:p,{iceLat:90,age:null}),g=s(t(2.8,2.5),"d13C"),w=t(2.25,2).reduce((p,C)=>C.d13C>p.d13C?C:p,{d13C:-99,age:null}),x=s(t(2.6,Math.max(i??2.47,2.47)),"bifOx"),c=s(t(2.2,1.9),"bifOx"),u=e(2.7),b=e(2),k=[{id:"goe",what:"Oxygen first rises above 1/100,000 of today’s level",model:st(i),real:"about 2.43 Ga (accept 2.50 to 2.30)",pass:i!==null&&i<=2.5&&i>=2.3,source:"Gumsley et al. 2017; Warke et al. 2020"},{id:"mif",what:"Sulfur isotopes lose their mass-independent signal for good",model:st(l),real:"about 2.22 to 2.33 Ga (accept 2.35 to 2.20)",pass:l!==null&&l<=2.35&&l>=2.2,source:"Luo et al. 2016; Poulton et al. 2021"},{id:"methane",what:"Methane in the air at 2.7 Ga",model:`${Ka(u.ch4)} ppm`,real:"tens to hundreds of ppm (accept 20 to 3,000)",pass:u.ch4>=20&&u.ch4<=3e3,source:"Pavlov et al. 2000; Haqq-Misra et al. 2008"},{id:"warm",what:"Mean surface temperature at 2.7 Ga, under a fainter Sun",model:`${u.T.toFixed(1)} °C`,real:"liquid oceans, no ice near the equator (accept 0 to 40 °C)",pass:u.T>=0&&u.T<=40,source:"Feulner 2012 (the faint young Sun problem)"},{id:"bif",what:"Oxide banded iron is laid down fastest before oxygen rises",model:`peak at ${st(d.age)}`,real:"big pulses near 2.7 and 2.5 Ga, before oxygen rose",pass:i!==null&&d.age>i,source:"Bekker et al. 2010"},{id:"huronian",what:"Ice reaches below 35° latitude (or the equator) between 2.45 and 2.22 Ga",model:f.age===null?"no":f.iceLat<5?`Snowball at ${st(f.age)}`:`ice to ${f.iceLat.toFixed(0)}° at ${st(f.age)}`,real:"Makganyene and Huronian glaciations, 2.43 to 2.29 Ga, some near the equator",pass:f.age!==null&&f.iceLat<35,source:"Evans et al. 1997; Gumsley et al. 2017"},{id:"warmAfter",what:"No ice age from 2.15 to 1.8 Ga (ice stays poleward of 40°)",model:m.age===null?"-":`ice line at least ${m.iceLat.toFixed(0)}°`,real:"no glacial deposits for over a billion years after 2.2 Ga",pass:m.iceLat>=40,source:"Hoffman 2013"},{id:"o2Later",what:"Oxygen in the air at 2.0 Ga",model:`${Ka(b.pal*100)} % of today`,real:"about 0.1 to 10 % of today (accept 0.1 to 40 %)",pass:b.pal>=.001&&b.pal<=.4,source:"Kump 2008; Planavsky et al. 2014"},{id:"deep",what:"The deep sea still has no oxygen at 2.0 Ga",model:`${b.deepO2.toFixed(2)} µM of O₂, ${b.deepFe.toFixed(0)} µM of iron below 500 m`,real:"deep water stayed iron-rich or sulfidic",pass:b.deepO2<1,source:"Poulton & Canfield 2011"},{id:"lomagundi",what:"Carbonate δ¹³C climbs 5 ‰ above its Archean level between 2.25 and 2.0 Ga",model:w.age===null?"-":`+${(w.d13C-g).toFixed(1)} ‰ at ${st(w.age)}`,real:"+8 to +12 ‰ (the Lomagundi event, 2.22 to 2.06 Ga)",pass:w.d13C-g>=5,source:"Karhu & Holland 1996; Bekker 2022",why:"In the model the burst of phosphate from weathering long-buried sulfide rock comes right after the first rise of oxygen and is small, so carbon isotopes rise only a little, and too early. What drove the real shift of about +10 ‰ is still debated."},{id:"bifGap",what:"Banded iron fades after oxygen rises (2.2 to 1.9 Ga under half of 2.6 Ga onward)",model:`${x>0?Math.round(100*c/x):0} % of the earlier rate`,real:"almost none from 2.4 until 1.9 Ga",pass:c<.5*x,source:"Bekker et al. 2010",why:"Vents keep feeding iron into the model’s deep sea, and rust keeps forming where it meets oxygen near the surface. In the real ocean the deep water may have turned sulfidic, trapping the iron as pyrite; this model makes too little sulfate for that."}];return{checks:k,passed:k.filter(p=>p.pass).length,total:k.length}}var Ua='(()=>{function is(r){let t=String(r),e=2166136261;for(let a=0;a<t.length;a++)e^=t.charCodeAt(a),e=Math.imul(e,16777619);return e>>>0}var Gt=class{constructor(t=1){let e=is(t);this.a=e,this.b=(e^2654435769)>>>0,this.c=(e^608135816)>>>0,this.d=1;for(let a=0;a<16;a++)this.u32()}u32(){let{a:t,b:e,c:a,d:o}=this,i=(t+e|0)+o|0;return o=o+1|0,t=e^e>>>9,e=a+(a<<3)|0,a=a<<21|a>>>11,a=a+i|0,this.a=t,this.b=e,this.c=a,this.d=o,i>>>0}float(){return this.u32()/4294967296}int(t){return Math.floor(this.float()*t)}binomial(t,e){if(t<=0||e<=0)return 0;if(e>=1)return t;if(e>.5)return t-this.binomial(t,1-e);let a=t*e;if(a<25){let n=1-e,l=e/n,f=(t+1)*l,u=Math.pow(n,t),p=this.float(),y=0;for(;p>u;){if(p-=u,y++,y>t)return t;if(u*=f/y-l,u<=0)break}return y}let o=Math.sqrt(a*(1-e)),i=Math.sqrt(-2*Math.log(1-this.float()))*Math.cos(2*Math.PI*this.float());return Math.max(0,Math.min(t,Math.round(a+o*i)))}shuffle(t){for(let e=t.length-1;e>0;e--){let a=this.int(e+1),o=t[e];t[e]=t[a],t[a]=o}return t}};var te={NX:56,NZ:20,width:14e5,depth:4e3,shelfEdge:2e5,ridgeX:108e4,oceanArea:36e13,kh:300,khShelf:300,riverPlume:1e5,kvMixed:.005,kvShelf:.001,kvDeep:3e-5,mixedDepth:50,upwelling:.2,overturning:.12,pistonVelocity:1e3,lightDepth:20,henryO2:1300,henryCH4:1400,muCyano:300,muFerro:1500,kP:.1,kFe:5,CP:106,martinOxic:.86,martinAnoxic:.45,burialOxic:.08,burialAnoxic:.2,pRetainAnoxic:.35,kSO4:400,dirShare:.5,dirRelease:.6,kdP:.0087,feSat:60,feSatRate:.01,kO2:.5,moxRate:30,aomRate:.02,hsOxRate:300,fesRate:300},yt=1e-6,Ie=.001,Jt=r=>{let t=r-Ie;return .5*(t+Math.sqrt(t*t+yt*yt))},ze=r=>{let t=r-Ie;return .5*(1+t/Math.sqrt(t*t+yt*yt))};function Ne(r,t,e){let a=Math.min(1,Math.max(0,(e-r)/(t-r)));return a*a*(3-2*a)}function rs(r){let t=te;if(r<t.shelfEdge)return 25+125*(r/t.shelfEdge);let e=150+3650*Ne(t.shelfEdge,t.shelfEdge+26e4,r),a=1500*Math.exp(-(((r-t.ridgeX)/9e4)**2));return e-a}var bt=class{constructor(t,e){this.n=t,this.p=e,this.w=2*e+1,this.a=new Float64Array(t*this.w)}load(t){this.a.set(t)}add(t,e,a){this.a[t*this.w+(e-t+this.p)]+=a}factor(){let{n:t,p:e,w:a,a:o}=this;for(let i=0;i<t;i++){let n=i*a-i+e,l=o[n+i],f=Math.min(t-1,i+e);for(let u=i+1;u<=f;u++){let p=u*a-u+e,y=o[p+i];if(y===0)continue;let M=y/l;o[p+i]=M;for(let x=i+1;x<=f;x++)o[p+x]-=M*o[n+x]}}}solve(t,e){let{n:a,p:o,w:i,a:n}=this;for(let l=0;l<a;l++){let f=t[l],u=l*i-l+o;for(let p=Math.max(0,l-o);p<l;p++)f-=n[u+p]*e[p];e[l]=f}for(let l=a-1;l>=0;l--){let f=e[l],u=l*i-l+o,p=Math.min(a-1,l+o);for(let y=l+1;y<=p;y++)f-=n[u+y]*e[y];e[l]=f/n[u+l]}}},re=["P","E","M","H","theta","cf","rustCol","rustCell"],ee=class{constructor(){let t=te,e=t.NX,a=t.NZ;this.NX=e,this.NZ=a,this.N=e*a;let o=this.N;this.dx=t.width/e,this.margin=t.oceanArea/t.width,this.scale=.001*this.margin,this.zi=new Float64Array(a+1);for(let n=0;n<=a;n++)this.zi[n]=t.depth*(n/a)**2;this.zc=new Float64Array(a),this.hk=new Float64Array(a);for(let n=0;n<a;n++)this.zc[n]=.5*(this.zi[n]+this.zi[n+1]),this.hk[n]=this.zi[n+1]-this.zi[n];this.floor=new Float64Array(e),this.kb=new Int32Array(e),this.water=new Uint8Array(o),this.vol=new Float64Array(o);for(let n=0;n<e;n++){let l=rs((n+.5)*this.dx);this.floor[n]=l;let f=0;for(let u=0;u<a;u++)(u===0||this.zc[u]<l)&&(this.water[this.idx(n,u)]=1,f=u);this.kb[n]=f;for(let u=0;u<=f;u++)this.vol[this.idx(n,u)]=this.dx*this.hk[u]}this.light=new Float64Array(a);for(let n=0;n<a;n++){let l=t.lightDepth;this.light[n]=l/this.hk[n]*(Math.exp(-this.zi[n]/l)-Math.exp(-this.zi[n+1]/l))}for(this.nPhotic=0;this.nPhotic<a&&this.light[this.nPhotic]>.01;)this.nPhotic++;this.ventCells=[];for(let n=0;n<e;n++){let l=(n+.5)*this.dx;Math.abs(l-t.ridgeX)<.75*9e4&&this.ventCells.push(this.idx(n,this.kb[n]))}this.riverCells=[],this.riverShare=[];let i=0;for(let n=0;n<e;n++){let l=(n+.5)*this.dx;if(l>t.shelfEdge)break;let f=Math.exp(-l/t.riverPlume);for(let u=0;u<2&&u<=this.kb[n];u++)this.riverCells.push(this.idx(n,u)),this.riverShare.push(f*this.hk[u]),i+=f*this.hk[u]}for(let n=0;n<this.riverShare.length;n++)this.riverShare[n]/=i;this.buildTransport(),this.Tdiag=new Float64Array(o);for(let n=0;n<o;n++)this.Tdiag[n]=this.T.a[n*this.T.w+this.T.p];this.mP=new bt(o,a),this.mM=new bt(o,a),this.mH=new bt(o,a),this.mE=new bt(o,a),this.P=new Float64Array(o),this.E=new Float64Array(o),this.M=new Float64Array(o),this.H=new Float64Array(o),this.O2=new Float64Array(o),this.Fe=new Float64Array(o),this.theta=new Float64Array(o),this.cf=new Float64Array(o),this.rustCol=new Float64Array(e),this.rhs=new Float64Array(o),this.tmp=new Float64Array(o),this.resp=new Float64Array(o),this.lamC=new Float64Array(o),this.lamF=new Float64Array(o),this.kapF=new Float64Array(o),this.feOld=new Float64Array(o),this.fixC=new Float64Array(o),this.fes=new Float64Array(o),this.exportC=new Float64Array(e),this.burFrac=new Float64Array(e),this.pRet=new Float64Array(e),this.rustCell=new Float64Array(o),this.respPot=new Float64Array(o),this.eTry=new Float64Array(o),this.res2=new Float64Array(o),this.rsc=new Float64Array(o),this.lin=new Float64Array(o),this.gasK=new Float64Array(o),this.dem=new Float64Array(o),this.ferroMax=new Float64Array(o),this.fesK=new Float64Array(o),this.res=new Float64Array(o),this.jd=new Float64Array(o),this.mOld=new Float64Array(o),this.hOld=new Float64Array(o),this.fOx=new Float64Array(o),this.feX=new Float64Array(o),this.srcM=new Float64Array(o),this.srcH=new Float64Array(o),this.srcFe=new Float64Array(o),this.remin=new Float64Array(o),this.toFloor=new Float64Array(e),this.openW=new Float64Array(e),this.diag={prodCyano:new Float64Array(o),prodFerro:new Float64Array(o),rust:new Float64Array(o),methane:new Float64Array(o),bifOx:new Float64Array(e),bifRed:new Float64Array(e),pyrite:new Float64Array(e),orgBur:new Float64Array(e),seepCH4:new Float64Array(e)},this.reset()}idx(t,e){return t*this.NZ+e}reset(t=20,e=1.5){for(let a=0;a<this.N;a++){let o=this.water[a];this.P[a]=o?e:0,this.E[a]=o?-t/4:0,this.M[a]=0,this.H[a]=0,this.theta[a]=0,this.cf[a]=0}this.rustCol.fill(0),this.rustCell.fill(0),this.views()}buildTransport(){let t=te,{NX:e,NZ:a,N:o,dx:i,zi:n}=this,l=t.width,f=h=>n[this.kb[h]+1],u=new Float64Array((e+1)*(a+1)),p=(h,d)=>h*(a+1)+d,y=(h,d)=>h>=0&&h<e&&d>=0&&d<a&&this.water[this.idx(h,d)]===1;for(let h=1;h<e;h++)for(let d=1;d<a;d++){if(!(y(h-1,d-1)&&y(h,d-1)&&y(h-1,d)&&y(h,d)))continue;let m=h*i,A=n[d],c=Math.min(f(h-1),f(h)),O=Math.min(c,300),P=Ne(0,t.shelfEdge,m)*Math.exp(-Math.max(0,m-t.shelfEdge)/12e4),K=A<O?Math.sin(Math.PI*A/O):0,q=1e5,_=m<l-q?Math.min(1,Math.max(0,(m-1e5)/(l-q-1e5))):Math.max(0,(l-m)/q),I=Math.sin(Math.PI*A/c);u[p(h,d)]=-(t.upwelling*P*K+t.overturning*_*I)*3156e4}this.qx=new Float64Array(o),this.qz=new Float64Array(o),this.dE=new Float64Array(o),this.dD=new Float64Array(o);for(let h=0;h<e;h++){let d=this.floor[h]<200;for(let m=0;m<a;m++){let A=this.idx(h,m);if(this.water[A]){if(y(h+1,m)){this.qx[A]=u[p(h+1,m)]-u[p(h+1,m+1)];let c=this.floor[h]<200?t.khShelf:t.kh;this.dE[A]=c*this.hk[m]/i*3156e4}if(y(h,m+1)){this.qz[A]=u[p(h+1,m+1)]-u[p(h,m+1)];let c=n[m+1]<t.mixedDepth?t.kvMixed:d?t.kvShelf:t.kvDeep;this.dD[A]=c*i/(this.zc[m+1]-this.zc[m])*3156e4}}}}let M=new bt(o,a);for(let h=0;h<o;h++)this.water[h]||M.add(h,h,1);let x=(h,d,m,A)=>{M.add(h,h,m),M.add(h,d,-m),M.add(d,d,m),M.add(d,h,-m),A>0?(M.add(h,h,A),M.add(d,h,-A)):A<0&&(M.add(d,d,-A),M.add(h,d,A))};for(let h=0;h<o;h++)this.water[h]&&(this.dE[h]>0&&x(h,h+a,this.dE[h],this.qx[h]),this.dD[h]>0&&x(h,h+1,this.dD[h],this.qz[h]));this.T=M}transportOut(t,e){let{N:a,NZ:o}=this,{a:i,w:n,p:l}=this.T;for(let f=0;f<a;f++){if(!this.water[f]){e[f]=0;continue}let u=f*n-f+l,p=0,y=Math.max(0,f-o),M=Math.min(a-1,f+o);for(let x=y;x<=M;x++)p+=i[u+x]*t[x];e[f]=p}}views(){for(let t=0;t<this.N;t++){if(!this.water[t]){this.O2[t]=0,this.Fe[t]=0;continue}let e=this.E[t],a=Math.sqrt(e*e+yt*yt);this.O2[t]=.5*(e+a),this.Fe[t]=2*(a-e)}}solve(t,e){let a=te,{NX:o,NZ:i,N:n,vol:l,water:f,P:u,E:p,M:y,H:M,theta:x,cf:h}=this,d=this.scale,m=this.diag,A=Math.min(o,Math.max(0,(1-t.iceFrac)*o));this.iceCols=o-A;let c=Math.ceil(A),O=this.openW;for(let s=0;s<o;s++)O[s]=Math.min(1,Math.max(0,A-s));let P=a.pistonVelocity*this.dx,K=a.henryO2*t.pO2,q=a.henryCH4*t.pCH4,_=t.tempFactor,I=Math.max(0,t.SO4),L=I/(I+a.kSO4),$=a.aomRate*(I/(I+200)),j=1/d,D=this.nPhotic,R=this.rhs,Mt=s=>s/i|0,U=this.mOld,ut=this.hOld;U.set(y),ut.set(M);let Kt=this.feOld;for(let s=0;s<n;s++)Kt[s]=this.Fe[s];let wt=this.remin;wt.fill(0);let At=this.burFrac,Lt=this.pRet;for(let s=0;s<o;s++){let w=1;for(let v=D;v<=this.kb[s];v++){let b=this.idx(s,v),k=a.martinAnoxic+(a.martinOxic-a.martinAnoxic)*x[b],N=w*(1-(this.zi[v]/this.zi[v+1])**k);wt[b]=N,w-=N}this.toFloor[s]=w;let C=x[this.idx(s,this.kb[s])];At[s]=a.burialAnoxic+(a.burialOxic-a.burialAnoxic)*C,Lt[s]=a.pRetainAnoxic+(1-a.pRetainAnoxic)*C}let dt=this.lamC,Ot=this.lamF;dt.fill(0),Ot.fill(0);let J=this.mP;J.load(this.T.a);for(let s=0;s<n;s++)R[s]=0,f[s]&&(J.add(s,s,l[s]/e+a.kdP*this.rustCell[s]),R[s]=l[s]/e*u[s]);this.riverCells.forEach((s,w)=>R[s]+=t.riverP*j*this.riverShare[w]);for(let s=0;s<c;s++){let w=this.kb[s],C=this.idx(s,w),v=this.toFloor[s]*(1-At[s]*Lt[s]);for(let b=0;b<D&&b<=w;b++){let k=this.idx(s,b),N=this.light[b]*t.lightFactor*O[s];dt[k]=a.muCyano*t.cyano*N*_/(a.CP*(u[k]+a.kP)),Ot[k]=h[k]/(a.CP*l[k]*Math.max(u[k],.001));let z=(dt[k]+Ot[k])*l[k];if(z!==0){J.add(k,k,z);for(let G=D;G<=w;G++)J.add(this.idx(s,G),k,-z*wt[this.idx(s,G)]);J.add(C,k,-z*v)}}}J.factor(),J.solve(R,u);for(let s=0;s<n;s++)(u[s]<0||!f[s])&&(u[s]=0);let pt=this.fixC;pt.fill(0);let zt=0,Ft=0,kt=0;for(let s=0;s<n;s++)f[s]&&(kt+=a.kdP*this.rustCell[s]*u[s]);let tt=this.respPot;tt.fill(0);let it=this.srcFe;it.fill(0);let _t=0,T=0,B=0,F=0,H=0;for(let s=0;s<o;s++){let w=0,C=0,v=this.kb[s];for(let W=0;W<D&&W<=v;W++){let E=this.idx(s,W),ht=a.CP*dt[E]*l[E]*u[E];pt[E]=ht,w+=ht+h[E],C+=(dt[E]+Ot[E])*l[E]*u[E],zt+=ht}H+=w,Ft+=C*this.toFloor[s]*At[s]*Lt[s];for(let W=D;W<=v;W++){let E=this.idx(s,W);tt[E]+=w*wt[E]}let b=this.idx(s,v),k=w*this.toFloor[s],N=k*At[s],z=k-N,G=Math.min(z,this.rustCol[s]*a.dirShare/4);z-=G,it[b]+=4*G*a.dirRelease,m.bifRed[s]=4*G*(1-a.dirRelease),m.bifOx[s]=Math.max(0,this.rustCol[s]-4*G),B+=m.bifRed[s],F+=m.bifOx[s],T+=4*G,tt[b]+=z,m.orgBur[s]=N,_t+=N}Ft+=kt;let V=Math.max(1,this.ventCells.length);for(let s of this.ventCells)it[s]+=t.ventFe*j/V;this.riverCells.forEach((s,w)=>it[s]+=t.riverFe*j*this.riverShare[w]);let X=this.lin,rt=this.gasK,Ct=this.dem,et=this.ferroMax,mt=this.fesK;rt.fill(0),et.fill(0);for(let s=0;s<n;s++){if(X[s]=0,Ct[s]=0,mt[s]=0,!f[s])continue;let w=l[s];X[s]=w/e*p[s]+pt[s]-it[s]/4,Ct[s]=tt[s]+2*a.moxRate*U[s]*w+2*a.hsOxRate*ut[s]*w,mt[s]=a.fesRate*ut[s]*w}for(let s=0;s<c;s++){let w=this.idx(s,0);rt[w]=P*O[s],X[w]+=P*O[s]*K;for(let C=0;C<D&&C<=this.kb[s];C++){let v=this.idx(s,C),b=this.light[C]*t.lightFactor*O[s];et[v]=a.muFerro*t.ferro*b*_*(u[v]/(u[v]+a.kP))*l[v]}}let Z=this.mE,nt=this.res,vt=this.jd,gt=a.kO2,xt=yt,st=this.Tdiag,It=(s,w,C)=>{this.transportOut(s,w);let v=0;for(let b=0;b<n;b++){if(!f[b]){w[b]=0,C&&(vt[b]=0);continue}let k=s[b],N=Math.sqrt(k*k+xt*xt),z=.5*(k+N),G=2*(N-k),W=Jt(z),E=Jt(G),ht=W/(W+gt),ts=E/(E+a.kFe),es=E/(E+.5),Qt=G-a.feSat,Te=Math.sqrt(Qt*Qt+1),ss=.5*(Qt+Te),oe=l[b],He=a.feSatRate*oe/4,as=rt[b]*z+Ct[b]*ht-et[b]*ts-mt[b]/4*es-He*ss;if(w[b]+=oe/e*k+as-X[b],C){let ie=.5*(1+k/N),Ee=-4*(1-ie),os=ze(z)*ie,Le=ze(G)*Ee;vt[b]=rt[b]*ie+Ct[b]*gt/((W+gt)*(W+gt))*os-et[b]*a.kFe/((E+a.kFe)*(E+a.kFe))*Le-mt[b]/4*(.5/((E+.5)*(E+.5)))*Le-He*.5*(1+Qt/Te)*Ee,this.rsc[b]=1/(st[b]+oe/e+vt[b])}let Re=w[b]*this.rsc[b];v+=Re*Re}return v},St=this.tmp,at=this.eTry,$t=this.res2,Y=0,Pt=It(p,nt,!0);for(let s=0;s<12;s++){Y=s+1,Z.load(this.T.a);for(let b=0;b<n;b++)f[b]&&(Z.add(b,b,l[b]/e+vt[b]),nt[b]=-nt[b]);Z.factor(),Z.solve(nt,St);let w=1,C=0;for(let b=0;b<8;b++){for(let k=0;k<n;k++)at[k]=f[k]?p[k]+w*St[k]:0;if(C=It(at,$t,!1),C<(1-1e-4*w)*Pt)break;w*=.5}let v=0;for(let b=0;b<n;b++){if(!f[b])continue;let k=at[b]-p[b],N=Math.abs(k)/(Math.abs(at[b])+.001);N>v&&(v=N),p[b]=at[b]}if(v<1e-6||C<1e-20*n)break;Pt=It(p,nt,!0)}this.newtonIters=Y;for(let s=0;s<n;s++)f[s]||(p[s]=0);this.views();let Nt=this.O2,lt=this.Fe;R.fill(0);for(let s=0;s<c;s++)R[this.idx(s,0)]=P*O[s];let Tt=this.tmp;Z.solve(R,Tt);let Xt=0,Vt=0;for(let s=0;s<c;s++){let w=this.idx(s,0),C=Math.sqrt(p[w]*p[w]+xt*xt),v=.5*(1+p[w]/C);Xt+=P*O[s]*Math.max(0,1-v*Tt[w]),Vt+=P*O[s]*(Nt[w]-K)}let Ut=this.srcM,Zt=this.srcH;Ut.fill(0),Zt.fill(0),m.methane.fill(0),m.seepCH4.fill(0);let Q=this.fOx,de=0,pe=0,me=0,ge=0,xe=0;for(let s=0;s<n;s++){if(Q[s]=0,!f[s])continue;let w=Jt(Nt[s]),C=w/(w+gt);Q[s]=C;let v=tt[s]*C,b=tt[s]-v,k=b*L,N=b-k;Zt[s]+=k/2,Ut[s]+=N/2,m.methane[s]=N/2/l[s];let z=Mt(s);s===this.idx(z,this.kb[z])&&(m.seepCH4[z]=N/2),de+=v,pe+=k/2,me+=N/2;let G=Jt(lt[s]);this.feX[s]=G;let W=et[s]*(G/(G+a.kFe));ge+=W,h[s]+=.5*(W-h[s]),m.prodFerro[s]=W/l[s],m.prodCyano[s]=pt[s]/l[s];let E=lt[s]-a.feSat,ht=a.feSatRate*l[s]/4*4*.5*(E+Math.sqrt(E*E+1));xe+=ht,m.bifRed[z]+=ht,x[s]+=.5*(C-x[s])}for(let s of this.ventCells)Ut[s]+=t.ventCH4*j/V;let be=this.res;this.transportOut(lt,be);let ye=0,Me=0,we=this.rustCol;we.fill(0);for(let s=0;s<n;s++){if(this.rustCell[s]=0,m.rust[s]=0,!f[s])continue;let w=l[s],C=this.feX[s],v=4*et[s]*(C/(C+a.kFe)),b=lt[s]-a.feSat,k=a.feSatRate*w*.5*(b+Math.sqrt(b*b+1)),N=mt[s]*(C/(C+.5)),z=it[s]-be[s]-w/e*(lt[s]-Kt[s])-v-k-N;z<0&&(Me-=z,z=0),ye+=z;let G=z+v;this.rustCell[s]=G,m.rust[s]=G/w,we[Mt(s)]+=G}let Ht=this.mM;Ht.load(this.T.a);for(let s=0;s<n;s++){if(R[s]=0,!f[s])continue;let w=l[s];Ht.add(s,s,w/e+(Q[s]*a.moxRate+(1-Q[s])*$)*w),R[s]=w/e*y[s]+Ut[s]}for(let s=0;s<c;s++){let w=this.idx(s,0);Ht.add(w,w,P*O[s]),R[w]+=P*O[s]*q}Ht.factor(),Ht.solve(R,y);let Ae=0,Oe=0,Fe=0;for(let s=0;s<n;s++){if((!f[s]||y[s]<0)&&(y[s]=0),!f[s])continue;let w=Q[s]*a.moxRate*y[s]*l[s],C=(1-Q[s])*$*y[s]*l[s];Zt[s]+=C,Ae+=w,Oe+=C,Fe+=2*Q[s]*a.moxRate*(U[s]-y[s])*l[s]}let ke=0;for(let s=0;s<c;s++)ke+=P*O[s]*(y[this.idx(s,0)]-q);R.fill(0);for(let s=0;s<c;s++)R[this.idx(s,0)]=P*O[s];Ht.solve(R,Tt);let Ce=0;for(let s=0;s<c;s++)Ce+=P*O[s]*Math.max(0,1-Tt[this.idx(s,0)]);let Yt=this.mH;Yt.load(this.T.a);for(let s=0;s<n;s++){if(R[s]=0,!f[s])continue;let w=l[s],C=this.feX[s]/(this.feX[s]+.5);Yt.add(s,s,w/e+(Q[s]*a.hsOxRate+C*a.fesRate)*w),R[s]=w/e*M[s]+Zt[s]}Yt.factor(),Yt.solve(R,M);let ve=0,Se=0,Pe=0;m.pyrite.fill(0);for(let s=0;s<n;s++){if((!f[s]||M[s]<0)&&(M[s]=0),!f[s])continue;let w=this.feX[s]/(this.feX[s]+.5),C=Q[s]*a.hsOxRate*M[s]*l[s],v=w*a.fesRate*M[s]*l[s];m.pyrite[Mt(s)]+=v,ve+=C,Se+=v,Pe+=Math.abs(Q[s]*a.hsOxRate*(ut[s]-M[s])*l[s])+Math.abs(w*a.fesRate*(ut[s]-M[s])*l[s])}return{o2ToAir:Vt*d,o2Slope:Xt*a.henryO2*d,ch4ToAir:ke*d,ch4Slope:Ce*a.henryCH4*d,prodCyano:zt*d,prodFerro:ge*d,exportC:H*d,orgBur:_t*d,aerobic:de*d,sulfRed:pe*d,methProd:me*d,mox:Ae*d,aom:Oe*d,sulfOx:ve*d,pyrite:Se*d,feOx:ye*d,bifOx:F*d,bifRed:(xe+B)*d,dir:T*d,pBur:Ft*d,pScav:kt*d,artefact:Me*d,lag:(Math.abs(Fe)+Pe)*d,iters:Y}}meanBelow(t,e){let a=0,o=0;for(let i=0;i<this.NX;i++)for(let n=0;n<=this.kb[i];n++){if(this.zc[n]<e)continue;let l=this.idx(i,n);a+=t[l]*this.vol[l],o+=this.vol[l]}return o>0?a/o:0}maxSurface(t,e=this.NX){let a=0;for(let o=0;o<e;o++)a=Math.max(a,t[this.idx(o,0)],t[this.idx(o,1)]);return a}saveState(t={}){for(let e of re)(!t[e]||t[e].length!==this[e].length)&&(t[e]=new Float64Array(this[e].length)),t[e].set(this[e]);return t}loadState(t){for(let e of re)this[e].set(t[e]);this.views()}snapshot(){return{P:Array.from(this.P),E:Array.from(this.E),M:Array.from(this.M),H:Array.from(this.H),theta:Array.from(this.theta),cf:Array.from(this.cf),rustCol:Array.from(this.rustCol),rustCell:Array.from(this.rustCell)}}restore(t){for(let e of re)this[e].set(t[e]);this.views()}};var ct={bands:18,S0:1361,A:205,B:2.09,D:.45,albedoFree:.3,albedoSlope:.078,albedoIce:.62,dustDarkening:.2,iceAt:-10,iceWidth:3,heatCap:4},Ge=r=>.5*(3*r*r-1);function ns(r){return 5.35*Math.log(Math.max(1e-7,r)/28e-5)}function ls(r){let t=e=>2*Math.log(1+Math.max(0,e)/.5);return t(r)-t(.7)}function ne(r,t){let e=r/Math.max(1e-9,t),a=Math.min(1,Math.max(0,(e-.1)/.2));return a*a*(3-2*a)}function hs(r,t){return-6*ne(r,t)}function ae(r,t,e){return ns(r)+ls(t)+hs(e,r)}var se=class{constructor(){let t=ct.bands;this.n=t,this.x=new Float64Array(t),this.s=new Float64Array(t),this.T=new Float64Array(t).fill(15),this.alpha=new Float64Array(t),this.cUp=new Float64Array(t);for(let e=0;e<t;e++){this.x[e]=(e+.5)/t,this.s[e]=1-.482*Ge(this.x[e]);let a=(e+1)/t;this.cUp[e]=e<t-1?ct.D*(1-a*a)*t*t:0}this._a=new Float64Array(t),this._b=new Float64Array(t),this._c=new Float64Array(t),this._d=new Float64Array(t),this.meanT=15,this.iceLat=90,this.iceFrac=0,this.dust=0}albedoAt(t,e){let a=ct,o=a.albedoFree+a.albedoSlope*Ge(this.x[t]),i=a.albedoIce-a.dustDarkening*this.dust,n=.5*(1-Math.tanh((e-a.iceAt)/a.iceWidth));return o+(i-o)*n}weather(t){this.iceLat<2?this.dust=Math.min(1,this.dust+t/2e7):this.dust=Math.max(0,this.dust-t/1e6)}settle(t,e,a=40){let o=ct,i=this.n,n=o.S0/4*t,{T:l,s:f,alpha:u,cUp:p,_a:y,_b:M,_c:x,_d:h}=this;for(let d=0;d<a;d++){for(let c=0;c<i;c++)u[c]=this.albedoAt(c,l[c]);for(let c=0;c<i;c++){let O=c>0?p[c-1]:0,P=p[c];y[c]=-O,x[c]=-P,M[c]=o.heatCap+o.B+O+P,h[c]=o.heatCap*l[c]+n*f[c]*(1-u[c])-o.A+e}for(let c=1;c<i;c++){let O=y[c]/M[c-1];M[c]-=O*x[c-1],h[c]-=O*h[c-1]}let m=0,A=h[i-1]/M[i-1];m=Math.max(m,Math.abs(A-l[i-1])),l[i-1]=A;for(let c=i-2;c>=0;c--)A=(h[c]-x[c]*l[c+1])/M[c],m=Math.max(m,Math.abs(A-l[c])),l[c]=A;if(m<.002&&d>2)break}this.summarise()}summarise(){let t=this.n,e=0;for(let i=0;i<t;i++)e+=this.T[i];this.meanT=e/t;let a=ct.iceAt,o=1;if(this.T[0]<a)o=0;else for(let i=1;i<t;i++)if(this.T[i]<a){let n=(this.T[i-1]-a)/(this.T[i-1]-this.T[i]);o=this.x[i-1]+n*(this.x[i]-this.x[i-1]);break}this.iceFrac=1-o,this.iceLat=Math.asin(Math.min(1,o))*180/Math.PI}tempAt(t){let a=Math.sin(Math.abs(t)*Math.PI/180)*this.n-.5,o=Math.max(0,Math.min(this.n-2,Math.floor(a))),i=Math.max(0,Math.min(1,a-o));return this.T[o]*(1-i)+this.T[o+1]*i}snapshot(){return Array.from(this.T)}restore(t){for(let e=0;e<this.n;e++)this.T[e]=t[e];this.summarise()}};var S={moles:18e19,PAL:378e17,escape:37e-6,kOmega:1e15,kEscapeO2:1e14,abioticO2:1e9,abioticCH4:1e10},cs={skipped:0},Bt=[.003,-.1655,3.2305,-25.8343,71.5398],ot=r=>(((Bt[0]*r+Bt[1])*r+Bt[2])*r+Bt[3])*r+Bt[4],Dt=10.5,fs=(ot(Dt+.01)-ot(Dt-.01))/.02,Wt=(()=>{let r=12;for(let t=12;t<18;t+=.001)ot(t)>ot(r)&&(r=t);return r})(),us=(ot(Wt-.5)-ot(Wt-1.5))/1;function ds(r,t=!0){return r<Dt?ot(Dt)+fs*(r-Dt):!t&&r>Wt-1?ot(Wt-1)+us*(r-(Wt-1)):ot(Math.min(r,20))}function ps(r,t=!0){return Math.pow(10,ds(Math.log10(Math.max(r,1)),t))}function Be(r){if(r<=1e-7)return 0;let t=Math.log10(r);return Math.min(1,Math.max(0,(t+6)/6))**1.6}function De(r,t,e){let o=ps(r,e.shield)*Math.pow(Math.max(t,0),.7),i=r/(r+S.kOmega),n=e.reductant*i,l=e.escapeOn?e.methanogens??1:1,f=.5*e.reductant*(1-i)*l,u=e.reductant*(1-i)*(1-l),p=e.escapeOn?S.escape*t:0,y=p*(r/(r+S.kEscapeO2)),M=r/S.PAL,x=e.weathering*Math.sqrt(Math.max(0,M)),h=e.backlog?e.backlog*r/(r+e.backlogHalf):0,d=e.oceanO2-e.oceanO2Slope*(r/S.moles),m=e.oceanCH4-e.oceanCH4Slope*(t/S.moles);return{photo:o,volcO2:n,volcCH4:f,volcH2:u,esc:p,escO2:y,weath:x,weathB:h,seaO2:d,seaCH4:m,dO:S.abioticO2+d-n-o-y-x-h,dM:S.abioticCH4+m+f-.5*o-p}}var ms=Math.log(1e3),gs=Math.log(S.moles),xs=Math.log(1e6),bs=Math.log(S.moles*.05);function ys(r,t,e,a){let o=[0,0],i=[0,0],n=[0,0],l=[0,0],f=(x,h,d)=>{let m=Math.exp(x),A=Math.exp(h),c=De(m,A,e);return d[0]=1-r/m-a*c.dO/m,d[1]=1-t/A-a*c.dM/A,d[0]*d[0]+d[1]*d[1]},u=(x,h)=>[Math.min(Math.max(x,ms),gs),Math.min(Math.max(h,xs),bs)],p=Math.log(r),y=Math.log(t),M=f(p,y,o);for(let x=0;x<60;x++){if(M<1e-22)return[Math.exp(p),Math.exp(y)];let h=1e-7;f(p+h,y,i),f(p,y+h,n);let d=(i[0]-o[0])/h,m=(i[1]-o[1])/h,A=(n[0]-o[0])/h,c=(n[1]-o[1])/h,O=d*c-A*m;if(!isFinite(O)||Math.abs(O)<1e-300)return null;let P=-(o[0]*c-o[1]*A)/O,K=-(d*o[1]-m*o[0])/O,q=Math.max(Math.abs(P),Math.abs(K));q>2&&(P*=2/q,K*=2/q);let _=1,I=!1;for(let L=0;L<30;L++){let[$,j]=u(p+_*P,y+_*K),D=f($,j,l);if(D<M*(1-1e-4*_)||D<1e-22){p=$,y=j,M=D,o[0]=l[0],o[1]=l[1],I=!0;break}_*=.5}if(!I)return M<1e-14?[Math.exp(p),Math.exp(y)]:null;if(_*q<1e-11)return M<1e-14?[Math.exp(p),Math.exp(y)]:null}return M<1e-14?[Math.exp(p),Math.exp(y)]:null}function We(r,t,e,a=16){let o=Math.min(Math.max(r.O2,1e6),S.moles),i=Math.min(Math.max(r.CH4,1e6),S.moles*.05),n=e/a,l=e,f=n,u=0;for(;l>n*1e-9&&u++<2e4;){let p=Math.min(f,l),y=ys(o,i,t,p);y?(o=y[0],i=y[1],l-=p,f=Math.min(n,p*2)):p>n*1e-7?f=p/4:(cs.skipped++,l-=p)}return r.O2=o,r.CH4=i,De(o,i,t)}function qe(r){return 1/(1+.4*(Math.max(0,r)/4.57))}function le(r){return 1+.75*Math.pow(Math.max(0,r)/3,1.5)}function je(r){return .2+.8/(1+Math.exp((r-2.55)/.12))}function he(r){return .25+.6/(1+Math.exp((r-2.5)/.15))}function Ke(r){let t=1/(1+Math.exp((r-2.44)/.01)),e=1/(1+Math.exp((2.23-r)/.01));return t*e}var qt={cyanoAge:2.9,ferrotrophs:!0,reductants:1,ventIron:1,weatheringP:1,volcanicCO2:1,continents:1,ozoneShield:!0,hydrogenEscape:!0,events:!0,lull:!0},_e={cyanoAge:{min:0,max:3,step:.05},reductants:{min:.3,max:2,step:.05},ventIron:{min:0,max:3,step:.05},weatheringP:{min:.2,max:3,step:.05},volcanicCO2:{min:.3,max:3,step:.05},continents:{min:.3,max:1.5,step:.05}},jt={real:{label:"Real Earth",blurb:"Best guesses for the young Earth: cyanobacteria from 2.9 Ga, the real eruptions, and the quiet spell in volcanism from 2.45 to 2.2 Ga.",params:{}},noCyano:{label:"No cyanobacteria",blurb:"Nothing on Earth splits water to make oxygen. Iron-eating microbes are the only photosynthesisers.",params:{cyanoAge:0}},earlyCyano:{label:"Earlier cyanobacteria",blurb:"Cyanobacteria from the very start at 3.0 Ga. Does the air turn sooner?",params:{cyanoAge:3}},volcanoes:{label:"Gassier volcanoes",blurb:"Half again as much reducing gas from volcanoes and the hot crust.",params:{reductants:1.5}},noLull:{label:"Volcanoes never go quiet",blurb:"No magmatic lull: volcanoes and ridges keep their pace from 2.45 to 2.2 Ga.",params:{lull:!1}},noLips:{label:"No great eruptions",blurb:"No large igneous provinces: no floods of lava, no fresh basalt to weather.",params:{events:!1}}},g={startAge:3,endAge:1.8,stepMyr:.5,spinUp:60,cyanoSpread:.06,volcCO2:3e13,weathK:1e13,weathT0:-5,weathTe:13.7,weathCO2:.3,pRef:.01,seafloorK:4e12,seafloorCO2:.23,carbWeathK:8e12,carbonCap:18e19,oceanCarbon:9,riverP:5e10,riverPRef:1e13,oxidativeP:1,reductant:1e13,subaerialOxidised:.5,crustHalf:15e21,metaShare:.5,ventFe:1e13,ventCH4:1e11,riverFe:5e11,oxWeath:15e12,kerogenShare:.7,pyriteShare:.25,backlog0:15e18,backlogRate:2e-8,backlogHalf:3e-5,backlogP:.08,volcS:6e11,evapK:15e11,oceanVolume:134e16,lipRate:1/50,lullDepth:.5};var Ms=le(g.startAge),ce=["CH4","O2"],$e=1e-5*S.PAL,ws=he(g.startAge),As=g.oceanVolume*.001,ft=(r,t,e)=>Math.min(e,Math.max(t,r)),fe=r=>{let t=ft(r,0,1);return t*t*(3-2*t)},Os=[{age:2.775,size:1.2,name:"Mount Roe (Fortescue)"},{age:2.72,size:1,name:"Ventersdorp"},{age:2.575,size:.8,name:"Great Dyke"},{age:2.505,size:.8,name:"Mistassini"},{age:2.46,size:1.4,name:"Matachewan"},{age:2.426,size:1.4,name:"Ongeluk"},{age:2.41,size:.8,name:"Widgiemooltha"},{age:2.367,size:.7,name:"Bangalore"},{age:2.217,size:1.2,name:"Nipissing"},{age:2.11,size:.8,name:"Marathon"},{age:2.055,size:1.4,name:"Bushveld"},{age:1.98,size:.8,name:"Jatulian"},{age:1.88,size:1.6,name:"Circum-Superior"}];function Fs(r){if(r==="earth")return Os.map(o=>({...o}));let t=new Gt(`${r}:lips`),e=[],a=g.startAge;for(;a-=-Math.log(1-t.float())/g.lipRate/1e3,!(a<g.endAge);){let o=t.float();e.push({age:a,size:.4+1.2*o*o})}return e}function ks(r,t){let e=0,a=0;for(let o of r)for(let i of o){let n=(i.age-t)*1e3;n<0||n>60||(n<1&&(e+=i.size),a+=i.size*Math.exp(-n/8))}return{pulse:e,basalt:a}}var Ue={carbonate:{label:"Carbonate platform",color:"#c9c2a8"},shale:{label:"Black shale",color:"#3b3a3f"},bifOx:{label:"Banded iron (oxide)",color:"#a5402c"},bifRed:{label:"Iron formation (siderite, greenalite)",color:"#6e7a52"},pyrite:{label:"Pyritic shale",color:"#8b8455"},diamictite:{label:"Glacial diamictite",color:"#9aa3ad"},capCarbonate:{label:"Cap carbonate",color:"#e2d6b5"},evaporite:{label:"Gypsum (evaporite)",color:"#efe9e1"}},Rt=class{constructor({seed:t="earth",scenario:e="real",params:a={}}={}){this.ocean=new ee,this.climate=new se,this.climateStart=new Float64Array(this.climate.n),this.climateMid=new Float64Array(this.climate.n),this.reset({seed:t,scenario:e,params:a})}reset({seed:t=this.seed,scenario:e=this.scenario,params:a={}}={}){this.seed=String(t),this.scenario=jt[e]?e:"real",this.params={...qt,...jt[this.scenario].params,...a},this.rngRecord=new Gt(`${this.seed}:record`),this.lips=Fs(this.seed),this.injected=[],this.kicks={O2:0,CH4:0,CO2:0,cold:0},this.age=g.startAge,this.step=0,this.air={O2:1e-13*S.moles,CH4:5e-4*S.moles},this.pCO2=.02,this.SO4=2,this.crustOx=0,this.mifMemory=1,this.backlog=g.backlog0,this.slope={CH4:0,O2:0},this.history=[],this.core=[],this.log=[],this.flags={cyano:!1,goe:!1,snowball:!1,lastThaw:-1,lull:!1,glacial:!1,methaneLow:!1},this.ocean.reset(),this.climate.T.fill(20),this.climate.dust=0,this.climate.summarise();for(let o=0;o<g.spinUp;o++)this.advance(!0);this.crustOx=0,this.record()}setParams(t){for(let[e,a]of Object.entries(t))e in qt&&(this.params[e]=a)}get done(){return this.age<=g.endAge+1e-9}run(t=1){for(let e=0;e<t&&!this.done;e++)this.advance(!1),this.record()}forcing(t){let e=this.params,a=le(t)/Ms,o=ft(je(t)*e.continents,.02,1.5),i=he(t),n=e.lull?Ke(t):0;return{lum:qe(t),hf:a,land:o,sub:i,lull:n,quiet:1-g.lullDepth*n,subFactor:(1-g.subaerialOxidised*i)/(1-g.subaerialOxidised*ws)}}cyanoAt(t){let e=this.params.cyanoAge;return e>0?fe((e-t)/g.cyanoSpread):0}inject(t){let e=this.air.O2/S.PAL;switch(t){case"lip":this.injected.push({age:this.age,size:1.6}),this.note("lab","You set off a flood of lava (a large igneous province).");break;case"oxygen":this.air.O2=Math.max(this.air.O2,.01*S.PAL)+.01*S.PAL,this.note("lab","You puffed oxygen into the air: about 2 % of today’s level.");break;case"methane":this.air.CH4+=.001*S.moles,this.note("lab","You released 1,000 ppm of methane.");break;case"co2":this.pCO2+=.05,this.note("lab","You added 0.05 bar of CO₂.");break;case"freeze":this.climate.T.fill(-40),this.climate.summarise(),this.note("lab","You froze the planet over.");break;case"cyano":this.params.cyanoAge>this.age||(this.params.cyanoAge=this.age+g.cyanoSpread),this.note("lab","Cyanobacteria arrive.");break;default:break}return e}note(t,e){this.log.push({age:this.age,step:this.step,kind:t,text:e})}advance(t){let e=this.params,a=this.age,o=g.stepMyr*1e6,i=this.forcing(a),n=t||!e.events?{pulse:0,basalt:0}:ks([this.lips,this.injected],a),l=this.climate,f=Math.max(this.pCO2,1e-6),u=1+.25*n.basalt,p=1/(1+this.crustOx/g.crustHalf),y=g.reductant*e.reductants*((1-g.metaShare)*i.hf*i.hf*i.subFactor+g.metaShare*i.hf*p)*(1+.2*n.pulse),M=g.volcCO2*e.volcanicCO2*i.hf*i.quiet*(1+.15*n.pulse),x=g.volcS*i.hf*i.quiet*(1+.3*n.pulse),h={O2:this.air.O2,CH4:this.air.CH4},d=Math.max(this.SO4,1e-4),m=this.climateStart;m.set(l.T);let A={pO2:0,pCH4:0,SO4:d,ventFe:g.ventFe*e.ventIron*i.hf*i.hf*i.quiet*(1+.3*n.pulse),ventCH4:g.ventCH4*i.hf,riverP:0,riverFe:0,iceFrac:0,tempFactor:1,lightFactor:1,cyano:this.cyanoAt(a),ferro:e.ferrotrophs?1:0},c=(T,B)=>{B&&(l.restore(m),l.settle(i.lum,ae(f,T.CH4/S.moles*1e6,T.CH4/S.moles)));let F=l.iceFrac,H=1-F,V=Ve(l),X=Math.exp((V-g.weathT0)/g.weathTe),rt=g.weathK*i.land*u*(f/g.pRef)**g.weathCO2*X*H,Ct=g.seafloorK*i.hf*(f/g.pRef)**g.seafloorCO2,et=g.carbWeathK*i.land*X*H,mt=g.oxWeath*i.land*H,Z=T.O2/S.PAL;A.pO2=T.O2/S.moles,A.pCH4=T.CH4/S.moles,A.SO4=T.SO4;let nt=g.backlogRate*this.backlog*i.land*H,vt=nt*Z/(Z+g.backlogHalf);A.riverP=e.weatheringP*(g.riverP*(2/12*(rt/g.riverPRef)+5/12*(et/g.carbWeathK)+5/12*g.oxidativeP*i.land*H*Math.sqrt(Z))+g.backlogP*vt);let gt=1-fe((Math.log10(Math.max(Z,1e-12))+5)/2);A.riverFe=g.riverFe*i.land*H*(rt/g.riverPRef)*gt;let xt=ne(A.pCH4,f);A.lightFactor=1-.3*xt,A.iceFrac=F,A.tempFactor=ft(2**((V-15)/10),.25,3);let st=this.ocean.solve(A,o),It={shield:e.ozoneShield,escapeOn:e.hydrogenEscape,reductant:y,methanogens:ft(H/.1,0,1),weathering:mt,backlog:3.75*nt,backlogHalf:g.backlogHalf*S.PAL,...Xe("O2",st.o2ToAir,st.o2Slope,A.pO2),...Xe("CH4",st.ch4ToAir,st.ch4Slope,A.pCH4)},St={O2:h.O2,CH4:h.CH4},at=We(St,It,o),$t=g.pyriteShare*at.weath/2.25+2*at.weathB/3.75,Y=Math.max(T.SO4,1e-4),Pt=g.evapK*i.land*(Y/28e3)**2,Nt=st.pyrite/Y*(400/(400+Y)),lt=2*Pt/Y,Tt=st.pyrite+Nt*(d-Y),Xt=Pt+lt*(d-Y),Vt=Math.max(1e-4,d+o*(x+$t-Tt-Xt)/(As+o*(Nt+lt)));return{O2:St.O2,CH4:St.CH4,SO4:Vt,oc:st,ar:at,W:rt,Wsf:Ct,Wcarb:et,ice:F,tFree:V,haze:xt,Spyr:$t,evap:Pt}},O=Math.log10,P=this.slope,K=(T,B)=>T==="O2"?.02:B.CH4>1e-6*S.moles?.01:.05,q=(T,B)=>{let F=Math.abs(O(B.SO4/T.SO4))/.02;for(let H of ce)F=Math.max(F,Math.abs(O(B[H]/T[H]))/K(H,T));return F},_=l.iceFrac,I={O2:h.O2,CH4:h.CH4,SO4:d},L=c(I,!1),$=q(I,L),j=[{g:I,r:L,err:$}],D={CH4:-1/0,O2:-1/0},R={CH4:1/0,O2:1/0};for(;$>1&&j.length<10;){let T={SO4:L.SO4};for(let F of ce){let H=O(I[F]),V=O(L[F])-H;if(F==="O2"&&I.O2>$e!=L.O2>$e){T.O2=L.O2,D.O2=-1/0,R.O2=1/0;continue}V>0?D[F]=Math.max(D[F],H):R[F]=Math.min(R[F],H),D[F]>=R[F]&&(D[F]=-1/0,R[F]=1/0);let X=H+ft(-V/(P[F]-1),-.7,.7);(X<=D[F]||X>=R[F])&&isFinite(D[F])&&isFinite(R[F])&&(X=.5*(D[F]+R[F])),T[F]=10**X}let B={g:I,r:L};I=T,L=c(I,!0),$=q(I,L),j.push({g:I,r:L,err:$}),this.debug&&this.debug(j.length,I,L,$,P);for(let F of ce){let H=O(I[F]/B.g[F]);Math.abs(H)>.001&&(P[F]=ft(O(L[F]/B.r[F])/H,-60,.9))}}if(this.coupleIters=j.length,$>1){let T=j.filter(F=>F.r.ice>.9!=_>.9),B=(T.length?T:j).reduce((F,H)=>H.err<F.err?H:F);B.r!==L&&(L=c(B.g,!0))}let{oc:Mt,ar:U,W:ut,Wsf:Kt,Wcarb:wt,haze:At,tFree:Lt,Spyr:dt,evap:Ot}=L;this.air.O2=L.O2,this.air.CH4=L.CH4,this.SO4=L.SO4,t||(this.crustOx+=(2*U.esc-U.escO2+U.volcH2)*o,this.backlog=Math.max(0,this.backlog-U.weathB/3.75*o));let J=1-L.ice,pt=g.kerogenShare*U.weath,zt=g.carbonCap*(1+g.oceanCarbon*J);t&&(zt*=.05);let Ft=this.air.CH4/S.moles*1e6,kt=this.climateMid;kt.set(l.T);let tt=T=>{l.restore(kt),l.settle(i.lum,ae(T,Ft,this.air.CH4/S.moles))},it=T=>{let B=Math.exp(T);tt(B);let F=Ve(l),H=g.weathK*i.land*u*(B/g.pRef)**g.weathCO2*Math.exp((F-g.weathT0)/g.weathTe)*(1-l.iceFrac),V=g.seafloorK*i.hf*(B/g.pRef)**g.seafloorCO2;return B-f-o*(M+pt-Mt.orgBur-H-V)/zt};this.pCO2=Cs(it,Math.log(f),Math.log(1e-5),Math.log(10));let _t=ae(this.pCO2,Ft,this.air.CH4/S.moles);tt(this.pCO2),t||l.weather(o),this.now={f:i,ev:n,W:ut,Wsf:Kt,Wcarb:wt,V:M,Worg:pt,Rv:y,riverP:A.riverP,riverFe:A.riverFe,env:A,oc:Mt,ar:U,haze:At,F:_t,Svolc:x,Spyr:dt,evap:Ot,tFree:Lt,crustFactor:p},t||(this.age=Math.max(g.endAge,a-g.stepMyr/1e3),this.step++)}record(){let t=this.now,e=t.oc,o=this.air.O2/S.PAL,i=Math.log10(Math.max(o,1e-14)),n=1-fe(i+6),l=15;this.mifMemory+=(n-this.mifMemory)*(1-Math.exp(-g.stepMyr/l));let f=ue(this.rngRecord),u=n*(2+2.5*f)+(1-n)*this.mifMemory*(.6+.4*f)+.08*ue(this.rngRecord),p=t.V+t.Wcarb+t.Worg,y=(-5*t.V-25*t.Worg)/Math.max(p,1),M=t.W+t.Wsf+t.Wcarb,x=e.orgBur/Math.max(e.orgBur+M,1),h=y+28*x+.4*ue(this.rngRecord),d=e.o2ToAir-2*e.ch4ToAir,m=this.air.CH4/S.moles*1e6,A=this.climate,c={step:this.step,age:this.age,pal:o,ch4:m,co2:this.pCO2,T:A.meanT,iceLat:A.iceLat,so4:this.SO4,X:d,Rv:t.Rv,o2ToAir:e.o2ToAir,ch4ToAir:e.ch4ToAir,orgBur:e.orgBur,bifOx:e.bifOx,bifRed:e.bifRed,pyrite:e.pyrite,prodCyano:e.prodCyano,prodFerro:e.prodFerro,riverP:t.riverP,W:t.W,weath:t.ar.weath,esc:t.ar.esc,photo:t.ar.photo,deepFe:this.ocean.meanBelow(this.ocean.Fe,500),deepO2:this.ocean.meanBelow(this.ocean.O2,500),surfO2:this.ocean.maxSurface(this.ocean.O2),d13C:h,d33S:u,mif:n,fOrg:x,haze:t.haze,ozone:Be(o),cyano:this.cyanoAt(this.age),lip:t.ev.pulse>0?1:0,lull:t.f.lull,crust:t.crustFactor,backlog:this.backlog/g.backlog0,weathB:t.ar.weathB,lith:""};c.lith=this.lithology(c),this.history.push(c),this.layCore(c),this.watch(c)}lithology(t){return t.iceLat<40?"diamictite":this.flags.lastThaw>=0&&this.step-this.flags.lastThaw<=2?"capCarbonate":t.bifOx>2e12?"bifOx":t.bifRed>2e12?"bifRed":t.so4>3e3?"evaporite":t.pyrite>15e11?"pyrite":t.orgBur>6e12&&t.deepO2<1?"shale":"carbonate"}layCore(t){let e=this.core[this.core.length-1];e&&e.lith===t.lith?(e.bottom=t.age,e.steps++):this.core.push({lith:t.lith,top:t.age+g.stepMyr/1e3,bottom:t.age,steps:1})}watch(t){let e=this.flags,a=g.stepMyr/1e3;for(let i of this.lips){if(i.age<=t.age||i.age>t.age+a)continue;let n=i.name?`the ${i.name} large igneous province`:"a large igneous province",l=e.lips?"":" For a million years it breathes out CO₂ and reducing gas; then its fresh basalt weathers fast and draws CO₂ down.";e.lips=(e.lips??0)+1,this.note("volcano",`Lava floods out: ${n}.${l}`)}!e.lull&&t.lull>.5?(e.lull=!0,this.note("volcano","Volcanoes and mid-ocean ridges go quiet (the magmatic lull): less CO₂ and less iron come out of the Earth.")):e.lull&&t.lull<.5&&(e.lull=!1,this.note("volcano","Volcanoes wake up again: more CO₂ warms the planet.")),e.cyano&&!e.goe&&!e.methaneLow&&t.ch4<10&&(e.methaneLow=!0,this.note("air","Methane has fallen below 10 ppm: the methane greenhouse is fading and the planet is cooling.")),!e.cyano&&t.cyano>.5&&(e.cyano=!0,this.note("life","Cyanobacteria spread through the sunlit sea, splitting water and giving off oxygen.")),!e.goe&&t.pal>1e-5&&(e.goe=!0,e.goeAge=t.age,this.note("air","Oxygen in the air passes 1/100,000 of today’s level: the Great Oxygenation has begun.")),e.goe&&!e.mifGone&&t.mif<.05&&(e.mifGone=!0,this.note("rock","Sulfur isotopes lose their mass-independent signal: with oxygen in the air, all sulfur rains out as sulfate and the signal blends away.")),e.mifGone&&t.mif>.5&&(e.mifGone=!1,this.note("rock","The mass-independent sulfur signal is back: the air has lost its oxygen again."));let o=t.iceLat<5;o&&!e.snowball?(e.snowball=!0,e.glacial=!0,this.note("ice","Ice reaches the equator: a Snowball Earth.")):!o&&e.snowball&&t.iceLat>30&&(e.snowball=!1,e.glacial=t.iceLat<45,e.lastThaw=this.step,this.note("ice","The snowball melts: volcanic CO₂ has built up enough greenhouse to break the ice.")),!e.glacial&&t.iceLat<40?(e.glacial=!0,this.note("ice","Ice sheets spread to the middle latitudes: an ice age.")):e.glacial&&t.iceLat>45&&(e.glacial=!1,this.note("ice","The ice retreats towards the poles."))}geometry(){let t=this.ocean;return{NX:t.NX,NZ:t.NZ,dx:t.dx,zi:Array.from(t.zi),floor:Array.from(t.floor),kb:Array.from(t.kb),water:Array.from(t.water),bands:this.climate.n,lips:this.lips.map(e=>({...e}))}}frame(){let t=this.ocean,e=t.diag,a=o=>Float32Array.from(o);return{step:this.step,age:this.age,done:this.done,O2:a(t.O2),Fe:a(t.Fe),P:a(t.P),CH4:a(t.M),H2S:a(t.H),prod:a(e.prodCyano),ferro:a(e.prodFerro),rust:a(e.rust),open:a(t.openW),T:a(this.climate.T),iceLat:this.climate.iceLat,dust:this.climate.dust}}historySince(t){let e=this.history.length;for(;e>0&&this.history[e-1].step>t;)e--;return this.history.slice(e)}};function Xe(r,t,e,a){let o=t+e*a;return o>=0||a<=0?{[`ocean${r}`]:Math.max(0,o),[`ocean${r}Slope`]:e}:{[`ocean${r}`]:0,[`ocean${r}Slope`]:-t/a}}function Cs(r,t,e,a){let o=ft(t,e,a),i=r(o);if(i===0)return Math.exp(o);let n=i<0?1:-1,l=o,f=i,u=.05;for(;Math.sign(f)===Math.sign(i);){if(n>0&&l>=a||n<0&&l<=e)return Math.exp(l);o=l,i=f,l=ft(l+n*u,e,a),f=r(l),u*=2}let p=0;for(let y=0;y<60&&Math.abs(l-o)>1e-5;y++){let M=(o*f-l*i)/(f-i),x=r(M);if(x===0)return Math.exp(M);Math.sign(x)===Math.sign(f)?(l=M,f=x,p===-1&&(i/=2),p=-1):(o=M,i=x,p===1&&(f/=2),p=1)}return Math.exp(Math.abs(i)<Math.abs(f)?o:l)}function Ve(r){let t=0,e=0;for(let a=0;a<r.n;a++)r.T[a]>ct.iceAt&&(t+=r.T[a],e++);return e?t/e:ct.iceAt}function ue(r){let t=1-r.float();return Math.sqrt(-2*Math.log(t))*Math.cos(2*Math.PI*r.float())}var Ze=[2,6,20,1e3];function Ye(r){let t=null,e=null,a=!1,o=1,i=null,n=0,l=0,f=()=>{let M=t.history,x=M.slice(n);n=M.length;let h=t.log.slice(l);l=t.log.length,r({type:"tick",frame:t.frame(),points:x,notes:h,core:t.core.slice(-3),params:t.params,running:a})},u=()=>{a=!1,i=null,e&&clearTimeout(e),e=null},p=()=>{if(e=null,!a)return;let M=Ze[o]??Ze[1],x=24,h=Date.now(),d=Math.max(1,Math.round(M/20)),m=0;for(;!t.done&&(m<d||M>=1e3&&Date.now()-h<x)&&!(i!==null&&t.age<=i+1e-9||(t.run(1),m++,Date.now()-h>x*2)););let A=i!==null&&t.age<=i+1e-9;(t.done||A)&&(a=!1,i=null),f();let c=M>=1e3?0:Math.max(0,1e3*Math.max(m,1)/M-(Date.now()-h));a?e=setTimeout(p,c):r({type:"paused",age:t.age,done:t.done})},y=()=>{t.done||(a=!0,e||(e=setTimeout(p,0)))};return function(x){try{switch(x.type){case"init":{u(),t=new Rt({seed:x.seed,scenario:x.scenario,params:x.params??{}}),n=0,l=0,r({type:"ready",geometry:t.geometry(),seed:t.seed,scenario:t.scenario,scenarios:jt,defaults:qt,ranges:_e,lith:Ue,startAge:g.startAge,endAge:g.endAge,stepMyr:g.stepMyr}),f();break}case"play":if(!t)break;typeof x.speed=="number"&&(o=x.speed),i=null,y();break;case"speed":o=x.speed;break;case"pause":u(),t&&r({type:"paused",age:t.age,done:t.done});break;case"runTo":if(!t)break;if(typeof x.speed=="number"&&(o=x.speed),t.age<=x.age+1e-9){u(),r({type:"paused",age:t.age,done:t.done});break}i=x.age,y();break;case"step":if(!t)break;u(),t.run(x.n??1),f(),r({type:"paused",age:t.age,done:t.done});break;case"inject":if(!t)break;t.inject(x.kind),f();break;case"set":if(!t)break;t.setParams(x.patch),f();break;default:break}}catch(h){u(),r({type:"error",message:String(h&&h.stack?h.stack:h)})}}}var vs=()=>new Promise(r=>setTimeout(r,0));async function Je(r,{seed:t="earth",scenario:e="real"}={}){let a=new Rt({seed:t,scenario:e}),o=Math.round((g.startAge-g.endAge)*1e3/g.stepMyr),i=Date.now();for(;!a.done;)a.run(1),Date.now()-i>40&&(r&&r({step:a.step,total:o,age:a.age}),await vs(),i=Date.now());return Ts(a.history,a.log)}var Et=r=>r==null?"never":`${r.toFixed(2)} Ga`,Qe=r=>{if(r===0)return"0";let t=Math.floor(Math.log10(Math.abs(r)));return t>=-2&&t<4?r.toPrecision(2):`${(r/10**t).toFixed(1)}×10${Ps(t)}`},Ss={"-":"⁻",0:"⁰",1:"¹",2:"²",3:"³",4:"⁴",5:"⁵",6:"⁶",7:"⁷",8:"⁸",9:"⁹"},Ps=r=>String(r).replace(/./g,t=>Ss[t]??t);function Ts(r){let t=c=>r.reduce((O,P)=>Math.abs(P.age-c)<Math.abs(O.age-c)?P:O),e=(c,O)=>r.filter(P=>P.age<=c&&P.age>=O),a=(c,O)=>c.reduce((P,K)=>P+K[O],0)/Math.max(1,c.length),o=r.find(c=>c.pal>1e-5),i=o?o.age:null,n=null;for(let c of r)c.mif>.5&&(n=c);let l=n&&n!==r[r.length-1]?n.age:null,f=r.reduce((c,O)=>O.bifOx>c.bifOx?O:c),u=e(2.45,2.22).reduce((c,O)=>O.iceLat<c.iceLat?O:c,{iceLat:90,age:null}),p=e(2.15,1.8).reduce((c,O)=>O.iceLat<c.iceLat?O:c,{iceLat:90,age:null}),y=a(e(2.8,2.5),"d13C"),M=e(2.25,2).reduce((c,O)=>O.d13C>c.d13C?O:c,{d13C:-99,age:null}),x=a(e(2.6,Math.max(i??2.47,2.47)),"bifOx"),h=a(e(2.2,1.9),"bifOx"),d=t(2.7),m=t(2),A=[{id:"goe",what:"Oxygen first rises above 1/100,000 of today’s level",model:Et(i),real:"about 2.43 Ga (accept 2.50 to 2.30)",pass:i!==null&&i<=2.5&&i>=2.3,source:"Gumsley et al. 2017; Warke et al. 2020"},{id:"mif",what:"Sulfur isotopes lose their mass-independent signal for good",model:Et(l),real:"about 2.22 to 2.33 Ga (accept 2.35 to 2.20)",pass:l!==null&&l<=2.35&&l>=2.2,source:"Luo et al. 2016; Poulton et al. 2021"},{id:"methane",what:"Methane in the air at 2.7 Ga",model:`${Qe(d.ch4)} ppm`,real:"tens to hundreds of ppm (accept 20 to 3,000)",pass:d.ch4>=20&&d.ch4<=3e3,source:"Pavlov et al. 2000; Haqq-Misra et al. 2008"},{id:"warm",what:"Mean surface temperature at 2.7 Ga, under a fainter Sun",model:`${d.T.toFixed(1)} °C`,real:"liquid oceans, no ice near the equator (accept 0 to 40 °C)",pass:d.T>=0&&d.T<=40,source:"Feulner 2012 (the faint young Sun problem)"},{id:"bif",what:"Oxide banded iron is laid down fastest before oxygen rises",model:`peak at ${Et(f.age)}`,real:"big pulses near 2.7 and 2.5 Ga, before oxygen rose",pass:i!==null&&f.age>i,source:"Bekker et al. 2010"},{id:"huronian",what:"Ice reaches below 35° latitude (or the equator) between 2.45 and 2.22 Ga",model:u.age===null?"no":u.iceLat<5?`Snowball at ${Et(u.age)}`:`ice to ${u.iceLat.toFixed(0)}° at ${Et(u.age)}`,real:"Makganyene and Huronian glaciations, 2.43 to 2.29 Ga, some near the equator",pass:u.age!==null&&u.iceLat<35,source:"Evans et al. 1997; Gumsley et al. 2017"},{id:"warmAfter",what:"No ice age from 2.15 to 1.8 Ga (ice stays poleward of 40°)",model:p.age===null?"-":`ice line at least ${p.iceLat.toFixed(0)}°`,real:"no glacial deposits for over a billion years after 2.2 Ga",pass:p.iceLat>=40,source:"Hoffman 2013"},{id:"o2Later",what:"Oxygen in the air at 2.0 Ga",model:`${Qe(m.pal*100)} % of today`,real:"about 0.1 to 10 % of today (accept 0.1 to 40 %)",pass:m.pal>=.001&&m.pal<=.4,source:"Kump 2008; Planavsky et al. 2014"},{id:"deep",what:"The deep sea still has no oxygen at 2.0 Ga",model:`${m.deepO2.toFixed(2)} µM of O₂, ${m.deepFe.toFixed(0)} µM of iron below 500 m`,real:"deep water stayed iron-rich or sulfidic",pass:m.deepO2<1,source:"Poulton & Canfield 2011"},{id:"lomagundi",what:"Carbonate δ¹³C climbs 5 ‰ above its Archean level between 2.25 and 2.0 Ga",model:M.age===null?"-":`+${(M.d13C-y).toFixed(1)} ‰ at ${Et(M.age)}`,real:"+8 to +12 ‰ (the Lomagundi event, 2.22 to 2.06 Ga)",pass:M.d13C-y>=5,source:"Karhu & Holland 1996; Bekker 2022",why:"In the model the burst of phosphate from weathering long-buried sulfide rock comes right after the first rise of oxygen and is small, so carbon isotopes rise only a little, and too early. What drove the real shift of about +10 ‰ is still debated."},{id:"bifGap",what:"Banded iron fades after oxygen rises (2.2 to 1.9 Ga under half of 2.6 Ga onward)",model:`${x>0?Math.round(100*h/x):0} % of the earlier rate`,real:"almost none from 2.4 until 1.9 Ga",pass:h<.5*x,source:"Bekker et al. 2010",why:"Vents keep feeding iron into the model’s deep sea, and rust keeps forming where it meets oxygen near the surface. In the real ocean the deep water may have turned sulfidic, trapping the iron as pyrite; this model makes too little sulfate for that."}];return{checks:A,passed:A.filter(c=>c.pass).length,total:A.length}}var Hs=Ye(r=>self.postMessage(r));self.onmessage=r=>{let t=r.data;if(t.type==="validate"){Je(e=>self.postMessage({type:"validation-progress",...e})).then(e=>self.postMessage({type:"validation",result:e})).catch(e=>self.postMessage({type:"error",message:String(e)}));return}Hs(t)};})();';function Ks(){if(!Ua||typeof Worker>"u"||typeof Blob>"u")return null;try{return URL.createObjectURL(new Blob([Ua],{type:"text/javascript"}))}catch{return null}}function Za(a){let e=Ks(),t=null,s=null,o=!1,i=[],r=()=>{if(!s){t&&t.terminate(),t=null,s=Va(l=>setTimeout(()=>a(l),0));for(let l of i.splice(0))s(l)}};if(e)try{t=new Worker(e),t.onmessage=l=>{o=!0,i.length=0,a(l.data)},t.onerror=l=>{o?a({type:"error",message:l.message||"The simulation stopped."}):(l.preventDefault?.(),r())}}catch{t=null}return t||r(),{get mode(){return t?"worker":"page"},send(l){t?(o||i.push(l),t.postMessage(l)):s(l)},validate(l){return e&&t?new Promise((d,f)=>{let m;try{m=new Worker(e)}catch{ea(l).then(d,f);return}m.onmessage=g=>{let w=g.data;w.type==="validation-progress"?l?.(w):w.type==="validation"?(m.terminate(),d(w.result)):w.type==="error"&&(m.terminate(),f(new Error(w.message)))},m.onerror=g=>{m.terminate(),f(new Error(g.message||"The check stopped."))},m.postMessage({type:"validate"})}):ea(l)}}}var Ja=[14,32,44],ke={oxy:[92,200,240],iron:[138,150,62],sulfide:[156,100,206],cyano:[60,222,168],ferro:[222,196,70],rust:[222,92,58],phos:[170,176,255],meth:[242,170,56]},Qa=ke,qe=(a,e,t)=>Math.min(t,Math.max(e,a)),ie=(a,e,t)=>qe((Math.log10(Math.max(a,1e-12))-e)/(t-e),0,1),re=(a,e,t)=>[a[0]+(e[0]-a[0])*t,a[1]+(e[1]-a[1])*t,a[2]+(e[2]-a[2])*t],Pe=(a,e=1)=>`rgba(${a[0]|0},${a[1]|0},${a[2]|0},${e})`,Et=a=>{let e=qe(a,0,1);return e*e*(3-2*e)},It=class{constructor(e){this.canvas=e,this.ctx=e.getContext("2d"),this.geo=null,this.frame=null,this.point=null,this.layer="redox",this.lith={},this.parts=[],this.spawn={cyano:null,rust:null},this.carry={},this.last=0,this.W=0,this.H=0}setGeometry(e,t){this.geo=e,this.lith=t??this.lith,this.off=document.createElement("canvas"),this.off.width=e.NX,this.off.height=e.NZ,this.offCtx=this.off.getContext("2d"),this.img=this.offCtx.createImageData(e.NX,e.NZ);let s=-1;for(let o=Math.floor(e.NX/2);o<e.NX;o++)(s<0||e.floor[o]<e.floor[s])&&(s=o);this.ridge=s,this.parts=[],this.layout()}resize(){let e=this.canvas.getBoundingClientRect(),t=Math.min(2,window.devicePixelRatio||1);this.W=Math.max(1,e.width),this.H=Math.max(1,e.height),this.canvas.width=Math.round(this.W*t),this.canvas.height=Math.round(this.H*t),this.ctx.setTransform(t,0,0,t,0,0),this.parts=[],this.layout()}layout(){let e=this.geo;!e||!this.W||(this.skyH=Math.round(this.H*.27),this.landW=Math.max(44,Math.round(this.W*.1)),this.oceanH=this.H-this.skyH,this.colW=(this.W-this.landW)/e.NX,this.rowH=this.oceanH/e.NZ,this.floorY=e.floor.map(t=>this.depthY(t)))}depthY(e){return this.skyH+this.oceanH*Math.sqrt(Math.max(0,e)/4e3)}floorAt(e){let t=this.geo,s=(e-this.landW)/this.colW-.5,o=qe(Math.floor(s),0,t.NX-2),i=qe(s-o,0,1);return this.floorY[o]*(1-i)+this.floorY[o+1]*i}setLayer(e){this.layer=e,this.paint()}setFrame(e,t){this.frame=e,this.point=t,this.paint(),this.prepareSpawns()}paint(){let e=this.geo,t=this.frame;if(!e||!t)return;let{NX:s,NZ:o}=e,i=this.img.data;for(let r=0;r<s;r++)for(let l=0;l<o;l++){let d=r*o+l,f=e.water[d]?d:r*o+e.kb[r],m=this.cellColor(t,f),g=(l*s+r)*4;i[g]=m[0],i[g+1]=m[1],i[g+2]=m[2],i[g+3]=255}this.offCtx.putImageData(this.img,0,0)}cellColor(e,t){let s=Ja,o=(i,r)=>{r>0&&(s=re(s,i,r))};switch(this.layer){case"life":o(ke.ferro,ie(e.ferro[t],-2,1)*.9),o(ke.cyano,ie(e.prod[t],-1,2.5)),o(ke.rust,ie(e.rust[t],-1.5,1));break;case"phosphate":o(ke.phos,qe(e.P[t]/1,0,1)*.95);break;case"methane":o(ke.meth,ie(e.CH4[t],-1,2)*.95);break;default:o(ke.iron,ie(e.Fe[t],-1,2)*.85),o(ke.oxy,ie(e.O2[t],-2,1)),o(ke.sulfide,ie(e.H2S[t],-1,1.5));break}return s}prepareSpawns(){let e=this.geo,t=this.frame,{NX:s,NZ:o}=e,i=r=>{let l=[],d=[],f=0;for(let m=0;m<s;m++)for(let g=0;g<o;g++){let w=m*o+g;if(!e.water[w])continue;let x=r(w,m,g);x<=0||(f+=x,l.push(w),d.push(f))}return{cells:l,cum:d,tot:f}};this.spawn.cyano=i((r,l,d)=>d<4?ie(t.prod[r],-.5,2.5)**2:0),this.spawn.ferro=i((r,l,d)=>d<4?ie(t.ferro[r],-1.5,1)**2:0),this.spawn.rust=i(r=>ie(t.rust[r],-1.5,1)**2)}pick(e){let t=Math.random()*e.tot,s=0,o=e.cum.length-1;for(;s<o;){let i=s+o>>1;e.cum[i]<t?s=i+1:o=i}return e.cells[s]}cellPos(e){let t=this.geo.NZ,s=Math.floor(e/t),o=e%t;return[this.landW+(s+Math.random())*this.colW,this.skyH+(o+Math.random())*this.rowH,s]}count(e,t,s){let o=(this.carry[e]??0)+t*s,i=Math.floor(o);return this.carry[e]=o-i,i}step(e){let t=this.point,s=this.frame;if(!t||!s||!this.geo)return;let o=this.parts,i=()=>o.length<420,r=this.W/700;for(let[c,u,b]of[["cyano",this.spawn.cyano,70],["ferro",this.spawn.ferro,30]]){if(!u||!u.tot)continue;let k=this.count(c,b*r*Math.min(1,u.tot/20),e);for(let p=0;p<k&&i();p++){let[C,y]=this.cellPos(this.pick(u));o.push({kind:c,x:C,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*3,age:0,life:1.6+Math.random()*1.6})}}if(this.spawn.rust&&this.spawn.rust.tot){let c=this.count("rust",45*r*Math.min(1,this.spawn.rust.tot/15),e);for(let u=0;u<c&&i();u++){let[b,k]=this.cellPos(this.pick(this.spawn.rust));o.push({kind:"rust",x:b,y:k,vx:0,vy:this.oceanH/12*(1+Math.random()),age:0,life:6})}}let l=[];for(let c=0;c<this.geo.NX;c++)s.open[c]>.5&&l.push(c);let d=(c,u,b,k,p)=>{if(!l.length||!(u>0))return;let C=this.count(c,p*r*ie(u,b,k),e);for(let y=0;y<C&&i();y++){let T=l[Math.floor(Math.random()*l.length)],P=this.landW+(T+Math.random())*this.colW;o.push({kind:c,x:P,y:this.skyH+2,vx:(Math.random()-.5)*4,vy:-(12+Math.random()*10),age:0,life:99})}};d("o2",t.o2ToAir,12,14.3,10),d("ch4",t.ch4ToAir,11,13.5,7);let f=1-.5*(t.lull??0);if(this.ridge>=0){let c=this.count("vent",10*r*f*(1+2*(t.lip??0)),e);for(let u=0;u<c&&i();u++){let b=this.ridge+Math.round((Math.random()-.5)*3),k=this.landW+(b+Math.random())*this.colW,p=this.floorAt(k)-2;o.push({kind:"vent",x:k,y:p,vx:(Math.random()-.5)*4,vy:-(8+Math.random()*8),age:0,life:2+Math.random()*2})}}let m=this.volcano(),g=t.lip?1:0,w=this.count("smoke",(1.2+6*g)*f,e);for(let c=0;c<w&&i();c++)o.push({kind:g?"ash":"smoke",x:m.x+(Math.random()-.5)*3,y:m.top,vx:3+Math.random()*5,vy:-(6+Math.random()*6),age:0,life:3+Math.random()*2});let x=0;for(let c of o){c.age+=e,c.x+=c.vx*e,c.y+=c.vy*e;let u=c.age<c.life;c.kind==="rust"&&c.y>=this.floorAt(c.x)-1&&(u=!1),(c.kind==="o2"||c.kind==="ch4")&&c.y<this.skyH*.25&&(u=!1),c.kind==="vent"&&c.y<this.skyH&&(u=!1),(c.x<0||c.x>this.W)&&(u=!1),u&&(o[x++]=c)}o.length=x}volcano(){return{x:this.landW*.42,top:this.skyH*.5,half:this.landW*.36}}draw(e){let t=this.ctx;if(!this.geo||!this.W)return;let s=this.last?Math.min(.1,(e-this.last)/1e3):0;this.last=e,this.frame&&this.step(s);let o=this.point,{W:i,H:r,skyH:l,landW:d}=this;t.clearRect(0,0,i,r);let f=o?o.haze:0,m=o?o.pal:1e-13,g=o?o.iceLat:90,w=Et((10-g)/10),x=t.createLinearGradient(0,0,0,l),c=re(re([44,86,132],[128,82,40],f),[150,170,190],w*.4),u=re(re([168,198,220],[228,168,92],f),[214,226,236],w*.5);x.addColorStop(0,Pe(c)),x.addColorStop(1,Pe(u)),t.fillStyle=x,t.fillRect(0,0,i,l+1);let b=d+Math.min(70,i*.12),k=l*.32,p=t.createRadialGradient(b,k,0,b,k,22);p.addColorStop(0,"rgba(255,248,226,0.95)"),p.addColorStop(.3,"rgba(255,236,190,0.55)"),p.addColorStop(1,"rgba(255,236,190,0)"),t.fillStyle=p,t.beginPath(),t.arc(b,k,22,0,Math.PI*2),t.fill(),t.imageSmoothingEnabled=!0,this.frame?t.drawImage(this.off,0,0,this.geo.NX,this.geo.NZ,d,l,i-d,this.oceanH):(t.fillStyle=Pe(Ja),t.fillRect(d,l,i-d,this.oceanH));let C=t.createLinearGradient(0,l,0,this.depthY(160));C.addColorStop(0,"rgba(255,255,255,0.10)"),C.addColorStop(1,"rgba(255,255,255,0)"),t.fillStyle=C,t.fillRect(d,l,i-d,this.depthY(160)-l);let y=this.geo,T=l*.2,P=(O,K)=>{K?O.moveTo(0,l-T):O.lineTo(0,l-T),O.bezierCurveTo(d*.45,l-T,d*.7,l-3,d,l+1)};t.beginPath(),t.moveTo(0,r),P(t,!1);for(let O=0;O<y.NX;O++)t.lineTo(d+(O+.5)*this.colW,this.floorY[O]);t.lineTo(i,this.floorY[y.NX-1]),t.lineTo(i,r),t.closePath();let G=t.createLinearGradient(0,l-T,0,r);G.addColorStop(0,"#5d534b"),G.addColorStop(1,"#2c2825"),t.fillStyle=G,t.fill();let z=o&&this.lith[o.lith];if(z){t.strokeStyle=z.color,t.lineWidth=3,t.lineJoin="round",t.beginPath(),t.moveTo(d+.5*this.colW,this.floorY[0]-1);for(let O=1;O<y.NX;O++)t.lineTo(d+(O+.5)*this.colW,this.floorY[O]-1);t.lineTo(i,this.floorY[y.NX-1]-1),t.stroke()}if(this.ridge>=0){let O=d+(this.ridge+.5)*this.colW,K=this.floorY[this.ridge],X=t.createRadialGradient(O,K,0,O,K,14);X.addColorStop(0,"rgba(255,170,90,0.75)"),X.addColorStop(1,"rgba(255,170,90,0)"),t.fillStyle=X,t.beginPath(),t.arc(O,K,14,0,Math.PI*2),t.fill()}let $=Et((Math.log10(Math.max(m,1e-14))+5)/2),E=Et((50-g)/25),j=re([118,112,98],[158,78,52],$);j=re(j,[232,238,244],E*.9),t.save(),t.beginPath(),P(t,!0),t.strokeStyle=Pe(j),t.lineWidth=5,t.lineCap="round",t.stroke(),t.restore();let H=this.volcano();if(t.beginPath(),t.moveTo(H.x-H.half,l-T+1),t.lineTo(H.x-2.5,H.top),t.lineTo(H.x+2.5,H.top),t.lineTo(H.x+H.half,l-T*.55),t.closePath(),t.fillStyle=Pe(re([88,78,70],[232,238,244],E*.6)),t.fill(),o&&o.lip){let O=t.createRadialGradient(H.x,H.top,0,H.x,H.top,12);O.addColorStop(0,"rgba(255,120,40,0.95)"),O.addColorStop(1,"rgba(255,120,40,0)"),t.fillStyle=O,t.beginPath(),t.arc(H.x,H.top,12,0,Math.PI*2),t.fill()}if(this.frame){let O=this.frame;t.fillStyle="rgba(236,244,250,0.95)";for(let K=0;K<y.NX;K++){let X=1-O.open[K];if(X<=.02)continue;let ae=d+K*this.colW,je=3+5*X;t.fillRect(ae-.5,l-1,this.colW+1,je)}}for(let O of this.parts)this.drawPart(t,O);this.drawGlobe(t,o),this.drawLabels(t)}drawPart(e,t){let s=Math.min(1,t.age*3,(t.life-t.age)*2);switch(t.kind){case"cyano":e.fillStyle=`rgba(110,240,190,${.9*s})`,e.fillRect(t.x-1,t.y-1,2.2,2.2);break;case"ferro":e.fillStyle=`rgba(240,214,90,${.85*s})`,e.fillRect(t.x-1,t.y-1,2,2);break;case"rust":e.fillStyle="rgba(236,98,60,0.9)",e.fillRect(t.x-1,t.y-1,2,2);break;case"vent":e.fillStyle=`rgba(180,190,92,${.8*s})`,e.fillRect(t.x-1,t.y-1,2,2);break;case"o2":{let o=t.y<this.skyH?qe((t.y-this.skyH*.25)/(this.skyH*.5),0,1):1;e.strokeStyle=`rgba(255,255,255,${.85*o})`,e.lineWidth=1,e.beginPath(),e.arc(t.x,t.y,1.8,0,Math.PI*2),e.stroke();break}case"ch4":{let o=t.y<this.skyH?qe((t.y-this.skyH*.25)/(this.skyH*.5),0,1):1;e.fillStyle=`rgba(255,190,80,${.9*o})`,e.beginPath(),e.arc(t.x,t.y,1.6,0,Math.PI*2),e.fill();break}default:{let o=2+t.age*2.2,i=t.kind==="ash";e.fillStyle=i?`rgba(120,70,50,${.45*s})`:`rgba(150,146,140,${.35*s})`,e.beginPath(),e.arc(t.x,t.y,o,0,Math.PI*2),e.fill()}}}drawGlobe(e,t){let s=Math.max(14,Math.min(this.skyH*.36,34)),o=this.W-s-10,i=this.skyH*.5,r=t?t.haze:0,l=e.createRadialGradient(o,i,s,o,i,s+6);l.addColorStop(0,Pe(re([150,200,240],[240,170,80],r),.7)),l.addColorStop(1,Pe(re([150,200,240],[240,170,80],r),0)),e.fillStyle=l,e.beginPath(),e.arc(o,i,s+6,0,Math.PI*2),e.fill(),e.save(),e.beginPath(),e.arc(o,i,s,0,Math.PI*2),e.clip();let d=this.frame?this.frame.T:null,f=d?d.length:18;for(let g=-s;g<s;g++){let w=Math.min(1,Math.abs((g+.5)/s)),x=Math.min(f-1,Math.floor(w*f)),c=d?d[x]:10,u;c<-10?u=[234,242,248]:u=re([40,84,130],[34,128,140],Et((c+10)/40)),e.fillStyle=Pe(u),e.fillRect(o-s,i+g,2*s,1.2)}let m=e.createRadialGradient(o-s*.35,i-s*.35,s*.1,o,i,s);m.addColorStop(0,"rgba(255,255,255,0.18)"),m.addColorStop(1,"rgba(0,0,0,0.35)"),e.fillStyle=m,e.fillRect(o-s,i-s,2*s,2*s),e.restore()}drawLabels(e){let{W:t,skyH:s,landW:o}=this,i=t<520;e.font=`${i?9.5:11}px "Atkinson Hyperlegible", system-ui, sans-serif`,e.textBaseline="middle";let r=(f,m,g,w="left")=>{e.textAlign=w,e.fillStyle="rgba(0,0,0,0.45)",e.fillText(f,m+.6,g+.8),e.fillStyle="rgba(255,255,255,0.85)",e.fillText(f,m,g)},l=this.geo,d=o+4*this.colW;r("shelf",d,this.depthY(260),"center"),r("deep sea",o+l.NX*.42*this.colW,this.depthY(2400),"center"),this.ridge>=0&&r(i?"vents":"ridge vents",o+(this.ridge+.5)*this.colW,this.depthY(1500),"center"),e.textAlign="right";for(let[f,m]of[[100,"100 m"],[1e3,"1 km"],[3e3,"3 km"]]){let g=this.depthY(f);e.fillStyle="rgba(255,255,255,0.35)",e.fillRect(t-6,g,6,1),r(m,t-9,g,"right")}i||r("sky",8,12)}};function Us(a,e,t,s,o){let i=Math.round(Math.log10(e));if(i>=-2&&i<=3){a.fillText(String(e>=1?Math.round(e):e),t,s);return}let r=`${o}px "IBM Plex Mono", ui-monospace, monospace`,l=`${o-2.5}px "IBM Plex Mono", ui-monospace, monospace`,d=String(i).replace("-","−");a.font=l;let f=a.measureText(d).width;a.fillText(d,t,s-4),a.font=r,a.fillText("10",t-f-.5,s)}var es=[{id:"o2",title:"Oxygen in the air, × today",log:!0,min:1e-14,max:1,ticks:[1e-12,1e-8,1e-4,1],series:[{key:"pal",color:"sky",width:2}],hline:{y:1e-5,label:"sulfur signal ends above this"},refs:[{from:2.46,to:2.43,label:"rise in rocks"}]},{id:"gh",title:"Greenhouse gases, ppm",log:!0,min:.01,max:1e6,ticks:[.01,1,100,1e4,1e6],series:[{key:"ch4",color:"amber",label:"methane",width:2},{key:"co2",color:"ink2",label:"CO₂",scale:1e6,width:1.6}]},{id:"temp",title:"Average temperature, °C",min:-40,max:30,ticks:[-30,-15,0,15],series:[{key:"T",color:"rust",width:2}],glacial:!0,refs:[{from:2.43,to:2.29,label:"glacial deposits"}]},{id:"s",title:"Sulfur isotopes Δ³³S, ‰",min:-5,max:12,ticks:[0,5,10],series:[{key:"d33S",color:"ink",dots:!0}],refs:[{from:2.33,to:2.22,label:"signal ends in rocks"}]},{id:"c",title:"Carbon isotopes δ¹³C, ‰",min:-8,max:14,ticks:[-5,0,5,10],series:[{key:"d13C",color:"teal",width:1.4}],refs:[{from:2.22,to:2.06,label:"Lomagundi"}]},{id:"bif",title:"Banded iron laid down, 10¹² mol/yr",min:0,max:10,ticks:[0,5,10],series:[{key:"bifOx",color:"rust",scale:1e-12,fill:!0,width:1.4}],refs:[{from:2.6,to:2.45,label:"great BIFs"},{from:1.89,to:1.87,label:""}]}],Z={left:40,right:10,title:17,gap:8,strip:16,axis:22},Wt=class{constructor(e){this.canvas=e,this.ctx=e.getContext("2d"),this.points=[],this.start=3,this.end=1.8,this.cursor=null,this.lith={},this.lips=[],this.W=0,this.H=0}setRange(e,t){this.start=e,this.end=t}resize(){let e=this.canvas.getBoundingClientRect(),t=Math.min(2,window.devicePixelRatio||1);this.W=Math.max(1,e.width),this.H=Math.max(1,e.height),this.canvas.width=Math.round(this.W*t),this.canvas.height=Math.round(this.H*t),this.ctx.setTransform(t,0,0,t,0,0);let s=es.length,o=(this.H-Z.strip-Z.axis)/s,i=o-Z.title-Z.gap;this.boxes=es.map((r,l)=>({panel:r,y:l*o+Z.title,h:i})),this.stripY=s*o}x(e){return Z.left+(this.start-e)/(this.start-this.end)*(this.W-Z.left-Z.right)}ageAt(e){let t=(e-Z.left)/(this.W-Z.left-Z.right);return this.start-Math.min(1,Math.max(0,t))*(this.start-this.end)}panelAt(e){return this.boxes?.find(t=>e>=t.y&&e<=t.y+t.h)?.panel.id??null}panelTop(e){return this.boxes?.find(t=>t.panel.id===e)?.y??0}pointAt(e){let t=this.points;if(!t.length)return null;let s=Math.round((t[0].age-e)/(t[0].age-t[t.length-1].age||1)*(t.length-1));return t[Math.min(t.length-1,Math.max(0,s))]}draw(e){let t=this.ctx,{W:s,H:o}=this;if(!this.boxes)return;t.clearRect(0,0,s,o);let i=this.points,r=Z.left,l=s-Z.right,d=(y,T=400)=>`${T} ${y}px "Atkinson Hyperlegible", system-ui, sans-serif`,f=y=>`${y}px "IBM Plex Mono", ui-monospace, monospace`,m=y=>{let T=[],P=null;for(let G of i)y(G)?P===null&&(P=G.age+25e-5):P!==null&&(T.push([P,G.age+25e-5]),P=null);return P!==null&&i.length&&T.push([P,i[i.length-1].age]),T},g=m(y=>y.iceLat<2),w=m(y=>y.iceLat<40);for(let y of this.boxes){let T=y.panel,P=$=>{let E=T.log?(Math.log10(Math.max($,T.min))-Math.log10(T.min))/(Math.log10(T.max)-Math.log10(T.min)):($-T.min)/(T.max-T.min);return y.y+y.h-Math.min(1,Math.max(0,E))*y.h};t.fillStyle=e.plot,t.fillRect(r,y.y,l-r,y.h),t.strokeStyle=e.line,t.lineWidth=1,t.font=f(9.5),t.textAlign="right",t.textBaseline="middle";for(let $ of T.ticks){let E=Math.round(P($))+.5;t.beginPath(),t.moveTo(r,E),t.lineTo(l,E),t.stroke(),t.fillStyle=e.ink3,T.log?Us(t,$,r-5,E,9.5):t.fillText(String($).replace("-","−"),r-5,E)}for(let $ of T.refs??[]){let E=this.x($.from),j=Math.max(E+2,this.x($.to));t.fillStyle=e.ref,t.fillRect(E,y.y,j-E,y.h),$.label&&(t.fillStyle=e.ink3,t.font=d(9.5),t.textAlign="left",t.textBaseline="bottom",t.fillText($.label,E+3,y.y+y.h-2))}for(let[$,E]of T.glacial?w:[])t.fillStyle=e.iceSoft,t.fillRect(this.x($),y.y,Math.max(1,this.x(E)-this.x($)),y.h);for(let[$,E]of g)t.fillStyle=e.ice,t.fillRect(this.x($),y.y,Math.max(1,this.x(E)-this.x($)),y.h);if(T.hline){let $=Math.round(P(T.hline.y))+.5;t.setLineDash([3,3]),t.strokeStyle=e.ink3,t.beginPath(),t.moveTo(r,$),t.lineTo(l,$),t.stroke(),t.setLineDash([]),t.fillStyle=e.ink3,t.font=d(9.5),t.textAlign="right",t.textBaseline="bottom",t.fillText(T.hline.label,l-3,$-2)}t.save(),t.beginPath(),t.rect(r,y.y,l-r,y.h),t.clip();for(let $ of T.series){let E=e[$.color],j=O=>O[$.key]*($.scale??1);if($.dots){t.fillStyle=E;for(let O of i)t.fillRect(this.x(O.age)-.9,P(j(O))-.9,1.8,1.8);continue}if(!i.length)continue;t.beginPath();let H=-1;i.forEach((O,K)=>{let X=this.x(O.age);if(K>0&&X-H<.5&&K<i.length-1)return;H=X;let ae=P(j(O));K===0?t.moveTo(X,ae):t.lineTo(X,ae)}),$.fill?(t.lineTo(this.x(i[i.length-1].age),y.y+y.h),t.lineTo(this.x(i[0].age),y.y+y.h),t.closePath(),t.globalAlpha=.35,t.fillStyle=E,t.fill(),t.globalAlpha=1):(t.strokeStyle=E,t.lineWidth=$.width??1.6,t.lineJoin="round",t.stroke())}t.restore(),t.font=d(11.5,700),t.textAlign="left",t.textBaseline="alphabetic";let G=y.y-5;t.fillStyle=e.ink2,t.fillText(T.title,r,G);let z=r+t.measureText(T.title).width+12;if(T.series.length>1){t.font=d(11);for(let $ of T.series)t.fillStyle=e[$.color],t.fillRect(z,G-4,10,2.5),t.fillText($.label,z+13,G),z+=t.measureText($.label).width+24}}let x=this.boxes[0].y;t.fillStyle=e.amber;let c=0;for(let y of i){if(y.lip&&!c){let T=this.x(y.age);t.beginPath(),t.moveTo(T-4,x),t.lineTo(T+4,x),t.lineTo(T,x+6),t.closePath(),t.fill()}c=y.lip}let u=this.stripY;t.fillStyle=e.plot,t.fillRect(r,u,l-r,Z.strip-4);let b=null;for(let y=0;y<i.length;y++){let T=i[y];b===null&&(b=y);let P=i[y+1];if(!P||P.lith!==T.lith){let G=this.x(i[b].age+5e-4),z=this.x(T.age);t.fillStyle=this.lith[T.lith]?.color??e.ink3,t.fillRect(G,u,Math.max(1,z-G),Z.strip-4),b=null}}t.fillStyle=e.ink3,t.font=d(9.5),t.textAlign="right",t.textBaseline="middle",t.fillText("rock",r-5,u+(Z.strip-4)/2);let k=u+Z.strip;t.strokeStyle=e.ink3,t.fillStyle=e.ink3,t.font=f(10),t.textAlign="center",t.textBaseline="top";let p=s<560?2:1,C=Math.round((this.start-this.end)*10);for(let y=0;y<=C;y++){let T=this.start-y/10,P=Math.round(this.x(T))+.5;t.beginPath(),t.moveTo(P,k-4),t.lineTo(P,k),t.stroke(),y%p===0&&t.fillText(T.toFixed(1),P,k+2)}if(t.textAlign="left",t.fillText("Ga",6,k+2),i.length){let y=Math.round(this.x(i[i.length-1].age))+.5;t.strokeStyle=e.ink2,t.setLineDash([2,3]),t.beginPath(),t.moveTo(y,this.boxes[0].y),t.lineTo(y,u+Z.strip-4),t.stroke(),t.setLineDash([])}if(this.cursor!==null&&i.length){let y=Math.round(this.x(this.cursor))+.5;t.strokeStyle=e.ink,t.lineWidth=1,t.beginPath(),t.moveTo(y,this.boxes[0].y),t.lineTo(y,u+Z.strip-4),t.stroke()}}};var Zs={"-":"⁻",0:"⁰",1:"¹",2:"²",3:"³",4:"⁴",5:"⁵",6:"⁶",7:"⁷",8:"⁸",9:"⁹"},Js=a=>String(a).replace(/./g,e=>Zs[e]??e),wt=a=>a.replace(/^-/,"−");function ts(a,e=1,t=!1){if(!Number.isFinite(a))return"–";if(a===0)return"0";let s=Math.floor(Math.log10(Math.abs(a))),o=(a/10**s).toFixed(e);return Math.abs(Number(o))>=10&&(s+=1,o=(a/10**s).toFixed(e)),o=o.replace(/\.0+$/,""),wt(t?`${o}×10<sup>${wt(String(s))}</sup>`:`${o}×10${Js(s)}`)}function te(a,e=2,t=!1){if(!Number.isFinite(a))return"–";if(a===0)return"0";let s=Math.abs(a);if(s>=1e7||s<.001)return ts(a,1,t);let o=Math.floor(Math.log10(s)),i=Number(a.toPrecision(e));return wt(i.toLocaleString("en-US",{maximumFractionDigits:Math.max(0,e-1-o)}))}function ot(a,e=!1){return a>=.001?`${te(a*100)} %`:ts(a,0,e).replace(/^1×/,"")}var ue=(a,e=!1)=>`${te(a,2,e)} ppm`,nt=a=>`${wt((Math.abs(a)<.05?0:a).toFixed(1))} °C`,Be=a=>a.toFixed(3),aa=(a,e=1)=>wt(a.toFixed(e));function as(a){return a<2?"to the equator":a>=89.5?"none":`from ${Math.round(a)}°`}function Nt(a){return String(a).replace(/[&<>"]/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[e])}var ve=[{id:"start",title:"A planet without oxygen",body:["Three billion years ago the Earth had oceans, continents and plenty of microbes, but almost no oxygen: less than a ten-trillionth of [today’s level|pal]. The air was mostly nitrogen and carbon dioxide, with some [methane].","The sea was strange too. [Hot springs|vents] on the sea floor poured out [dissolved iron|ferrous]. With no oxygen to rust it, the iron stayed dissolved: the deep sea held tens of micromoles of it per litre, tens of thousands of times more than today.","And the Sun shone a fifth weaker than it does now: the [faint young Sun|faintsun]."],predict:{q:"With the Sun this faint, what kept the oceans from freezing?",options:[{text:"A stronger greenhouse: more CO₂ and methane in the air",right:!0},{text:"The Earth was closer to the Sun"},{text:"Heat from the Earth’s hot interior"}],explain:"The Earth’s orbit was about the same, and the heat leaking out of its interior is less than a thousandth of the sunlight the surface absorbs, even with a hotter mantle. The [greenhouse] made the difference. In the model the air starts with about 15 % CO₂ and 800 ppm of methane."},show:{steps:[{age:2.95,speed:2}],layer:"redox",highlight:"ch4"},look:"The green-brown water is dissolved iron, from the surface to the sea floor. Tap any number under the picture to see what it means."},{id:"cyano",title:"The oxygen makers",body:["[Cyanobacteria|cyano] learned to split water with sunlight and give off oxygen as waste. When this happened is debated; in the model they spread through the sunlit sea about 2.9 billion years ago. Every breath you take traces back to them: the chloroplasts in plant cells are their descendants.","They grow best near the coast, where [upwelling] brings [phosphate] up from the deep."],predict:{q:"Cyanobacteria start pouring out oxygen. What happens to the oxygen in the air?",options:[{text:"It rises quickly towards today’s level"},{text:"It barely changes: something uses it up as fast as it is made",right:!0},{text:"It rises, then falls straight back"}],explain:"Oxygen in the air rises ten-thousandfold, from about 10⁻¹³ to 10⁻⁹ of today’s level, which is still almost nothing. Dissolved iron, gases from volcanoes and methane destroy oxygen within days to years. Only small [oxygen oases|oases] form in the surface water."},show:{steps:[{age:2.84,speed:3}],layer:"life",highlight:"o2"},look:"The bright teal in the top layer is cyanobacteria at work, thickest over the shelf. Switch the picture to “Oxygen & iron” to see the thin oxygen oases above the iron-rich water."},{id:"bif",title:"Rust rain: banded iron",body:["Where oxygen meets dissolved iron, the two react at once. The iron turns to [rust], which cannot dissolve, so it falls to the sea floor as tiny grains. Layer upon layer, this builds [banded iron formations|bif], rocks striped red and grey that hold most of the iron ore mined today.","[Iron-eating microbes|ferrotrophs] can make rust with sunlight too, without any oxygen, and may have laid down banded iron before cyanobacteria existed."],predict:{q:"Where in the sea does most of the rust form?",options:[{text:"Deep down, next to the hot springs that release the iron"},{text:"In the sunlit water, where rising iron meets oxygen",right:!0},{text:"On land, and rivers wash it in"}],explain:"The vents supply the iron, but rust needs oxygen (or light, for iron-eating microbes), and both are found only near the surface. Upwelling carries the iron up to meet them."},show:{steps:[{age:2.7,speed:3}],layer:"life",highlight:"sea"},look:"Red specks are rust grains sinking from the surface. The red line on the sea floor and the red stretch of the rock strip under the charts are banded iron in the making."},{id:"sinks",title:"Why oxygen had to wait",body:["For hundreds of millions of years cyanobacteria made oxygen, yet the air stayed almost empty of it. It comes down to a balance.","The lasting source: when dead plankton are buried in mud before they rot, the oxygen they made while growing is left over ([burial of organic matter|burial]).","The sinks: volcanoes and hot rock breathe out hydrogen and other [reducing gases|reductants], vents release iron, and methane burns oxygen in the air. While the sinks are bigger than the source, oxygen cannot build up.","Slowly the sinks weaken. The mantle cools, so volcanoes give off less gas. Hydrogen [escapes to space|hescape], leaving oxygen behind. And with less volcanic hydrogen for [methanogens] to feed on, methane falls and the planet cools."],predict:{q:"What finally tipped the balance?",options:[{text:"A sudden burst of new life"},{text:"The sinks slowly weakened until the source won",right:!0},{text:"A comet brought oxygen"}],explain:"Nothing dramatic is needed. In the model the oxygen source barely changes; the sinks shrink as the Earth’s interior cools, until one day they are smaller than the source."},show:{steps:[{age:2.55,speed:3}],layer:"redox",highlight:"ch4",focus:"charts"},look:"In the greenhouse chart, methane slides from hundreds of ppm to a few. The temperature follows it down. Oxygen creeps up but is still tiny."},{id:"goe",title:"The Great Oxygenation",body:["When the source finally outruns the sinks, the air changes in a geological instant. In the model, oxygen leaps several thousandfold within half a million years, to more than a tenth of a percent of today’s level. The rocks put this moment at about 2.43 billion years ago; the model gets there a little early, at 2.47.","Why a jump and not a slope? Oxygen high in the air makes an [ozone layer|ozone]. Ozone blocks the ultraviolet light that drives the reactions in which oxygen and methane destroy each other, so the more oxygen there is, the longer it lasts. Past a tipping point this feeds on itself.","The rocks record the moment: sulfur loses its [mass-independent signal|mif], and [red beds|redbeds] start to form on land."],predict:{q:"Once the balance tips, how fast does oxygen rise?",options:[{text:"Slowly, over hundreds of millions of years"},{text:"In a geological instant",right:!0},{text:"Not at all: the sinks catch up straight away"}],explain:"The ozone feedback turns a slow drift into a jump: a little ozone lets oxygen last longer, which makes more ozone. In the model oxygen goes from about 3×10⁻⁷ to 1.5×10⁻³ of today’s level in a single half-million-year step."},show:{steps:[{age:2.48,speed:3},{age:2.455,speed:1}],layer:"redox",highlight:"o2",focus:"charts"},look:"The oxygen line shoots up by four powers of ten. The sulfur dots, scattered until now, close in towards zero: the mass-independent signal is gone."},{id:"snowball",title:"Snowball Earth",body:["Methane was a large part of the greenhouse, and by now most of it is gone. Then volcanoes go quiet (the [magmatic lull|lull]), so less CO₂ comes out, and the planet cools further. Ice spreads from the poles, and white ice reflects sunlight, which cools the planet more: the [ice–albedo feedback|albedo]. Past a point this runs away, and ice reaches the equator: a [Snowball Earth|snowball].","In the model the last push comes from the Bangalore lava flood, 2.37 billion years ago: its fresh basalt weathers quickly and pulls CO₂ out of the air.","Rocks from 2.43 to 2.22 billion years ago hold glacial deposits ([diamictites|diamictite]) in Canada ([the Huronian|huronian]) and South Africa, where some formed near the equator."],predict:{q:"Once the whole planet is frozen, what melts it?",options:[{text:"The Sun warms up"},{text:"CO₂ from volcanoes builds up until the greenhouse wins",right:!0},{text:"Nothing: it stays frozen for good"}],explain:"The Sun brightens far too slowly, under 1 % every 100 million years. Volcanoes keep breathing out CO₂, but frozen rock cannot [weather|weathering] it away, so it builds up over a few million years until the ice melts. Dust settling on the ice helps by darkening it. Right after, the hot, CO₂-rich world weathers rock furiously and lays down [cap carbonates|capcarb]."},show:{steps:[{age:2.37,speed:3},{age:2.354,speed:1}],layer:"redox",highlight:"ice"},look:"Ice closes over the sea, the globe turns white, and CO₂ climbs to over 10 % of the air before the ice breaks."},{id:"yoyo",title:"Oxygen comes and goes",body:["The first rise of oxygen does not last. In the model, ice and the quiet volcanoes of the [magmatic lull|lull] cool the planet; colder, icier land weathers less, so rivers carry less phosphate to the sea and fewer cyanobacteria grow. When the Ongeluk lava flood ([a large igneous province|lip]) adds a burst of reducing gas, oxygen collapses and methane returns.","After the snowball melts, the hot world floods the sea with phosphate and oxygen surges to a few percent of today’s level, then fades again as the planet cools.","Oxygen comes to stay only when the volcanoes wake again, about 2.23 billion years ago: more CO₂, a warmer planet, more phosphate. Sulfur isotopes in real rocks tell a similar story of comings and goings until about 2.22 billion years ago (Poulton and others, 2021)."],predict:{q:"Oxygen has risen once. Can it fall back?",options:[{text:"No: once oxygen fills the air it stays"},{text:"Yes: if the source weakens, the sinks win again",right:!0}],explain:"Oxygen in the air lasts only a few million years unless it is replaced. If burial of organic matter slows (less phosphate, less growth), the sinks pull oxygen back down."},show:{steps:[{age:2.2,speed:3}],layer:"redox",highlight:"o2",focus:"charts"},look:"The oxygen line flickers: a rise at 2.47, a fall at 2.43, a spike after the snowball, then the last rise at 2.23."},{id:"rocks",title:"Reading the rocks",body:["Nobody measured the air 2.4 billion years ago. Everything we know comes from clues in rocks:","• [Banded iron formations|bif]: iron dissolved in the sea, rusted by oxygen or by microbes.","• [Mass-independent sulfur isotopes|mif]: present only while the air had almost no oxygen. They vanish between 2.33 and 2.22 billion years ago.","• [Pyrite and uraninite pebbles|detrital] in old riverbeds: minerals that oxygen destroys, gone after 2.4 billion years ago. [Red beds|redbeds] take their place.","• [Diamictites|diamictite] and [cap carbonates|capcarb]: ice ages and their hot aftermath.","• Carbon isotopes ([δ¹³C|d13c]): a long rise, the [Lomagundi event|lomagundi], suggests a lot of organic carbon was buried, and with it a lot of oxygen released."],predict:{q:"Which clue shows the air had almost no oxygen when the rock formed?",options:[{text:"A mass-independent sulfur signal",right:!0},{text:"Red sandstone"},{text:"Gypsum"}],explain:"Red sandstone and gypsum both need oxygen to form. The mass-independent sulfur signal survives only in air with less than about 1/100,000 of today’s oxygen."},show:{steps:[{age:1.8,speed:3}],focus:"charts"},look:"The rock strip under the charts is the core a geologist would drill through this history. The Validation tab compares the model with the real rocks, misses included."},{id:"lab",title:"Your turn",body:["The Lab tab lets you change the planet and run history again. A few questions to try:","• Without cyanobacteria, does oxygen ever rise?","• If volcanoes never go quiet, is there still a snowball?","• Freeze the planet yourself at 2.8 billion years ago. How long until it melts?","The same settings and the same seed always give the same history, so you can share a run by its seed."],show:{tab:"lab"},showLabel:"Open the Lab"}],sa={ga:["Ga","Giga-annum: a billion years ago. 2.4 Ga means 2.4 billion years before today."],pal:["Today’s level (PAL)","Oxygen given as a share of today’s amount (present atmospheric level). Today’s air is 21 % oxygen; 0.01 of today’s level is a hundredth of that."],goe:["Great Oxygenation Event","The first lasting rise of oxygen in the air, between about 2.43 and 2.22 billion years ago."],archean:["Archean","The eon from 4.0 to 2.5 billion years ago, before the air had oxygen."],cyano:["Cyanobacteria","Bacteria that photosynthesise by splitting water, giving off oxygen. Their descendants live on as the chloroplasts in every plant cell."],ferrotrophs:["Iron-eating microbes (photoferrotrophs)","Microbes that use sunlight to turn dissolved iron into rust instead of splitting water. They make no oxygen."],methanogens:["Methanogens","Microbes that make methane, from hydrogen and CO₂ or from rotting organic matter. They live only where there is no oxygen."],methane:["Methane (CH₄)","A greenhouse gas many times stronger than CO₂ per molecule. Today’s air holds 1.9 ppm; the Archean air may have held hundreds."],greenhouse:["Greenhouse effect","Gases such as CO₂ and methane let sunlight in but hold back the heat the surface gives off, warming it."],faintsun:["Faint young Sun","Stars like the Sun brighten as they age. Three billion years ago the Sun gave about 80 % of today’s light."],ferrous:["Dissolved iron (Fe²⁺)","Ferrous iron stays dissolved in water that has no oxygen. Hot springs and rivers supplied it. Water rich in it is called ferruginous."],rust:["Rust (Fe³⁺)","Ferric iron: iron that has met oxygen. It does not dissolve, so it falls out of the water as tiny grains."],bif:["Banded iron formation","Rock in thin stripes of iron oxide and silica, laid down on the sea floor from 3.8 billion years ago, most of all between 2.8 and 2.4, with a late burst around 1.88. Most iron ore comes from them."],vents:["Hydrothermal vents","Hot springs on the sea floor, mostly on mid-ocean ridges, where seawater runs through hot rock and picks up iron and gases."],upwelling:["Upwelling","Deep water rising to the surface near coasts, pushed by the wind. It brings up nutrients and, in the Archean, iron."],oases:["Oxygen oases","Patches of sunlit water where cyanobacteria made oxygen faster than it was destroyed, while the air and the deep sea had none."],phosphate:["Phosphate","The nutrient that limits how much the sea can grow over long times. Rivers bring it from weathering rock; rust grains and sediments remove it."],burial:["Burial of organic matter","Dead plankton buried in mud before they rot. The oxygen they made while growing stays in the air and sea: the lasting source of oxygen."],reductants:["Reducing gases","Gases that react with oxygen: hydrogen, carbon monoxide, hydrogen sulfide, methane. Volcanoes and hot rock give them off."],hescape:["Hydrogen escape","High in the air, sunlight breaks methane apart and light hydrogen atoms escape to space. Each one lost leaves oxygen behind, slowly oxidising the planet."],ozone:["Ozone layer","O₃ made from oxygen by ultraviolet light high in the air. It absorbs ultraviolet light, shielding the air and the surface below."],mif:["Mass-independent sulfur signal (Δ³³S)","Ultraviolet light splitting volcanic SO₂ sorts sulfur isotopes in an unusual way. In air without oxygen the sulfur falls out in different forms that keep the signal apart, and rocks store it. Above about 1/100,000 of today’s oxygen all sulfur falls out as sulfate and the signal blends away."],d13c:["Carbon isotopes (δ¹³C)","The share of heavy carbon-13 in carbonate rock. Life prefers light carbon, so when much organic matter is buried, the carbon left in the sea, and the carbonate made from it, gets heavier."],lomagundi:["Lomagundi event","The largest and longest rise in carbon isotopes in Earth’s history, about 2.22 to 2.06 billion years ago: a sign of huge organic carbon burial."],huronian:["Huronian glaciations","Three ice ages recorded in rocks around Lake Huron, Canada, between about 2.45 and 2.22 billion years ago."],snowball:["Snowball Earth","A planet frozen over to the equator. The ice reflects so much sunlight that only a large build-up of greenhouse gas can melt it."],albedo:["Ice–albedo feedback","Ice reflects sunlight, and reflected light does not warm the planet. More ice means colder, and colder means more ice."],weathering:["Weathering","Rain, made slightly acid by CO₂, slowly dissolves rock; the carbon ends up as limestone on the sea floor. Warm, wet climates weather faster, so it works as a slow thermostat. It also frees phosphate."],lip:["Large igneous province","A vast outpouring of lava within about a million years. It breathes out CO₂ and reducing gases; then its fresh basalt weathers fast, drawing CO₂ down."],lull:["Magmatic lull","A spell from about 2.45 to 2.2 billion years ago with remarkably few igneous rocks, as if volcanoes had gone quiet (Condie and others, 2009)."],diamictite:["Diamictite","Rock made of pebbles and boulders scattered in fine mud: what glaciers leave behind."],capcarb:["Cap carbonate","Limestone laid directly on glacial deposits, from the burst of weathering in the hot, CO₂-rich world after an ice age."],redbeds:["Red beds","Sandstone coloured red by rust coating its grains. It needs oxygen in the air and appears after about 2.3 billion years ago."],detrital:["Pyrite and uraninite pebbles","Grains of pyrite (FeS₂) and uraninite (UO₂) rounded by rivers. Oxygen destroys both, so their survival in old riverbeds means the air had almost none."],sulfate:["Sulfate","Sulfur combined with oxygen (SO₄²⁻), dissolved in seawater. Today’s sea holds 28,000 µM; with no oxygen there was very little."],micromolar:["µM (micromolar)","Millionths of a mole per litre: a way of counting molecules dissolved in water."],haze:["Organic haze","When there is more than about a tenth as much methane as CO₂, sunlight turns methane into an orange smog that shades and cools the planet, as on Saturn’s moon Titan."]};function zt(a){return Nt(a).replace(/\[([^\]|]+)(?:\|([^\]]+))?\]/g,(e,t,s)=>`<button type="button" class="term" data-term="${s??t.toLowerCase()}">${t}</button>`)}var oa=[{key:"o2",label:"Oxygen",unit:"of today’s level",value:a=>ot(a.pal,!0)},{key:"ch4",label:"Methane",unit:"today 1.9 ppm",value:a=>ue(a.ch4,!0)},{key:"co2",label:"CO₂",unit:"today 420 ppm",value:a=>ue(a.co2*1e6,!0)},{key:"temp",label:"Average temperature",short:"Temperature",unit:"today 15 °C",value:a=>nt(a.T)},{key:"ice",label:"Ice",unit:a=>a.iceLat<2?"a snowball":a.iceLat>=89.5?"ice-free":"to the poles",value:a=>a.iceLat<2?"everywhere":a.iceLat>=89.5?"none":`from ${Math.round(a.iceLat)}°`},{key:"sea",label:"Deep sea",unit:"below 500 m",value:a=>a.deepO2>1?`${te(a.deepO2)} µM O₂`:`${te(a.deepFe)} µM iron`}],ee=(a,e)=>`<button type="button" class="term" data-term="${a}">${e}</button>`;function os(a,e){let t=gt(e.age);switch(a){case"o2":{let s=e.pal<1e-5,o=ot(e.pal,!0);return{title:"Oxygen in the air",value:`${o} of today’s level`,html:[`Today’s air is 21 % oxygen. Here there is ${o} of that${e.pal>=1e-4?`, about ${te(e.pal*21e4)} ppm`:""}.`,s?`That is below 1/100,000 of today’s level. Sulfur keeps its ${ee("mif","mass-independent signal")}, and minerals such as pyrite survive in riverbeds. Iron, gases from volcanoes and methane destroy oxygen about as fast as it arrives.`:`That is above 1/100,000 of today’s level: enough to start an ${ee("ozone","ozone layer")} and to wipe out the ${ee("mif","mass-independent sulfur signal")}. Rocks on land now rust as they weather.`,`In the model oxygen builds up when ${ee("burial","burial of organic matter")} outpaces the ${ee("reductants","reducing gases")} from volcanoes, the iron from vents and the weathering of old rock.`],chart:"o2"}}case"ch4":{let s=Yt(e.ch4),o=ue(e.ch4,!0);return{title:"Methane in the air",value:o,html:[`Today’s air holds 1.9 ppm (parts per million) of methane; here there is ${o}.`,s>.5?`At this level it adds about ${te(s)} W/m² of warming compared with the air of 1850. For scale, doubling today’s CO₂ adds about 3.7 W/m².`:"At this level it adds almost nothing to the greenhouse.",`${ee("methanogens","Methanogens")} make it from volcanic hydrogen and from rotting organic matter. Methane and oxygen destroy each other in sunlight, so when one rises the other falls.`,e.haze>.05?`There is so much methane that an orange ${ee("haze","organic haze")} shades the planet.`:""],chart:"gh"}}case"co2":{let s=Xt(e.co2),o=e.iceLat<2,i=ue(e.co2*1e6,!0);return{title:"Carbon dioxide in the air",value:i,html:[`Today’s air holds about 420 ppm of CO₂. Here there is ${i}, which is ${te(e.co2*100)} % of the air, warming the surface by about ${te(s)} W/m² more than the air of 1850.`,`Volcanoes breathe CO₂ out; ${ee("weathering","weathering")} of rock and burial of organic carbon take it back. Weathering runs faster when it is warm, so over millions of years CO₂ works like a thermostat.`,o?"Right now the land is frozen and cannot weather, so volcanic CO₂ is building up in the air.":""],chart:"gh"}}case"temp":return{title:"Average temperature",value:nt(e.T),html:[`The average over the whole surface, poles included. Today it is about 15 °C; here it is ${nt(e.T)}.`,`The Sun gives ${Math.round(t*100)} % of today’s light (the ${ee("faintsun","faint young Sun")}), so the planet needs a stronger ${ee("greenhouse","greenhouse")} than today’s to stay this warm.`,"In the model temperature comes from an energy balance: sunlight in, heat out, heat carried from the equator to the poles, and ice wherever the yearly average falls below −10 °C."],chart:"temp"};case"ice":{let s=e.iceLat;return{title:"Ice",value:s<2?"Ice to the equator":s>=89.5?"No ice":`Ice from ${Math.round(s)}° to the poles`,html:["How close to the equator the ice reaches. In today’s climate the ice edge sits at about 66° latitude on average.",s<2?`A ${ee("snowball","Snowball Earth")}: ice covers the whole planet.`:s<35?`The ice has reached the danger zone. Below about 30° the ${ee("albedo","ice–albedo feedback")} can run away and freeze the whole planet.`:s<45?`An ice age: ice reaches the middle latitudes, where glaciers leave ${ee("diamictite","diamictites")} behind.`:"Ice stays near the poles."],chart:"temp"}}case"sea":return{title:"The deep sea",value:`${te(e.deepFe)} µM iron, ${te(e.deepO2,2,!0)} µM oxygen`,html:[`The average of the water below 500 m: ${te(e.deepFe)} µM of ${ee("ferrous","dissolved iron")} and ${te(e.deepO2,2,!0)} µM of oxygen. Today’s deep sea has 150 to 250 µM of oxygen and almost no iron (under 0.001 µM).`,`${ee("vents","Hot springs")} on the ridge pump iron in. It stays dissolved as long as no oxygen reaches it, and the deep sea did not get lasting oxygen until hundreds of millions of years after the air.`,`${ee("micromolar","µM")} means millionths of a mole per litre.`],chart:"bif"};default:return null}}function ns(a){let e=(r,l)=>`<button type="button" class="num" data-explain="${r}">${l}</button>`,t=e("o2",ot(a.pal,!0)),s=e("ch4",ue(a.ch4,!0)),o=e("ice",`${Math.round(a.iceLat)}°`);if(a.iceLat<2)return`The whole planet is frozen. Frozen rock cannot take up CO₂, so volcanic CO₂ is building up in the air: ${e("co2",ue(a.co2*1e6,!0))} now.`;if(a.pal>1e-5)return a.iceLat<40?`Oxygen is in the air (${t} of today’s level), but without its methane greenhouse the planet is cold: ice reaches ${o}.`:`Oxygen is in the air: ${t} of today’s level. Methane is down to ${s}.`;if(a.cyano>.5)return a.iceLat<40?`Ice reaches ${o}. Cyanobacteria still make oxygen, but iron, volcanic gases and methane destroy it: the air holds ${t} of today’s level.`:`Cyanobacteria make oxygen in the sunlit water, but iron, volcanic gases and methane destroy it as fast: the air holds only ${t} of today’s level.`;let i=`${Math.round(gt(a.age)*100)} %`;return`No life makes oxygen yet. Iron fills the sea, and methane (${s}) and CO₂ keep the planet warm under a Sun giving ${e("temp",i)} of today’s light.`}var Gt=[{key:"redox",label:"Oxygen & iron",legend:[["oxy","oxygen"],["iron","dissolved iron"],["sulfide","sulfide"]]},{key:"life",label:"Life",legend:[["cyano","cyanobacteria"],["ferro","iron-eating microbes"],["rust","rust forming"]]},{key:"phosphate",label:"Phosphate",legend:[["phos","phosphate, 0 to 1 µM"]]},{key:"methane",label:"Methane",legend:[["meth","dissolved methane"]]}],is=["The picture is a slice through the ocean, from the coast on the left, over the shallow shelf and down to the deep sea, with a mid-ocean ridge and its hot springs on the right. Depth is stretched so the sunlit top is easier to see: the sea floor of the deep basin is about 4 km down.","Colours show what is dissolved in the water; pick what to show with the buttons under the picture. Moving specks show what is happening: teal for cyanobacteria at work, red for rust sinking, white bubbles for oxygen and amber ones for methane leaving the sea, olive for iron rising from the vents.","The sky turns orange when methane makes a haze. The land on the left turns red once oxygen rusts the rocks, and the volcano smokes harder during lava floods. Ice spreads over the sea from the right as the planet freezes. The small globe shows how far the ice reaches."],rs=["The model couples five parts: the air (oxygen and methane, with the photochemistry and ozone shield of Goldblatt and others, 2006), a climate model with ice in 18 latitude bands, an ocean slice of 56 × 20 boxes with currents, plankton, iron, sulfur and methane, a carbon cycle with weathering, and a record of the rocks each step lays down.","Each step is half a million years. Slow forcings set the stage: a Sun brightening from 79 % to 86 % of today, a cooling mantle giving off less gas and iron, continents rising out of the sea, the magmatic lull and the large igneous provinces dated in real rocks.","It is a toy model: one slice stands for all the world’s ocean margins, the climate is a single yearly average, and many numbers are tuned to land near the evidence. It shows how the pieces push on each other, not exactly what happened."];var Qs=typeof Q=="object"?Q:null,A=a=>document.getElementById(a),I=Nt,eo=["1 Myr/s","3 Myr/s","10 Myr/s","Fastest"],hs=2,it=window.matchMedia("(min-width: 1040px)"),to=window.matchMedia("(prefers-reduced-motion: reduce)"),De=(a,e="start")=>a?.scrollIntoView?.({behavior:to.matches?"auto":"smooth",block:e}),pe={get(a,e){try{let t=window.localStorage.getItem(`goe:${a}`);return t===null?e:JSON.parse(t)}catch{return e}},set(a,e){try{window.localStorage.setItem(`goe:${a}`,JSON.stringify(e))}catch{}}},h={ready:!1,geometry:null,lith:{},scenarios:{},defaults:{},ranges:{},start:3,end:1.8,points:[],notes:[],frame:null,params:{},running:!1,done:!1,speed:pe.get("speed",hs),seed:"earth",scenario:"real",labParams:{},custom:!1,layer:pe.get("layer","redox"),tab:pe.get("tab","learn"),chapter:Math.min(ve.length-1,pe.get("chapter",0)),answers:pe.get("answers",{}),show:null,afterReady:null,note:null,narratorHtml:"",dirty:!0,chartsDirty:!0,lastCharts:0,cursor:null,validation:null,checkView:"model"};(!Number.isInteger(h.speed)||h.speed<0||h.speed>3)&&(h.speed=hs);var Re=new It(A("scene")),Me=new Wt(A("charts")),oe=null,le=()=>h.points[h.points.length-1],Ce=()=>le()?le().age:h.start;function ao(a){switch(a.type){case"ready":{h.ready=!0,h.geometry=a.geometry,h.lith=a.lith,h.scenarios=a.scenarios,h.defaults=a.defaults,h.ranges=a.ranges,h.start=a.startAge,h.end=a.endAge,h.seed=a.seed,h.scenario=a.scenario,h.points=[],h.notes=[],h.note=null,h.done=!1,h.running=!1,Re.setGeometry(a.geometry,a.lith),Re.resize(),Me.setRange(a.startAge,a.endAge),Me.lith=a.lith,Me.cursor=null,h.cursor=null,A("events").innerHTML="",bs(),wo();let e=h.afterReady;h.afterReady=null,e&&e();break}case"tick":{h.frame=a.frame;for(let e of a.points)h.points.push(e);for(let e of a.notes)h.notes.push(e),h.note={...e,at:performance.now()},bo(e);h.params=a.params,h.running=a.running,h.done=a.frame.done,le()&&Re.setFrame(a.frame,le()),h.dirty=!0,h.chartsDirty=!0;break}case"paused":h.running=!1,h.done=a.done,h.dirty=!0,h.show&&na();break;case"error":fs(a.message);break;default:break}}function fe({seed:a=h.seed,scenario:e=h.scenario,params:t=h.labParams,then:s=null}={}){h.afterReady=s,h.custom=!1,h.labParams={...t},oe.send({type:"init",seed:a,scenario:e,params:h.labParams})}function cs(){if(h.done){fe({then:()=>cs()});return}h.show=null,h.running=!0,oe.send({type:"play",speed:h.speed}),h.dirty=!0}function so(){h.show=null,oe.send({type:"pause"})}function ds(a,e=3){a>=Ce()-1e-9||h.done||(h.running=!0,oe.send({type:"runTo",age:a,speed:e}),h.dirty=!0)}function oo(a){let e=a.show;if(e.tab){rt(e.tab),De(A("side"));return}e.layer&&ps(e.layer);let t=e.steps[0].age,s=h.scenario==="real"&&h.seed==="earth"&&!h.custom&&!Object.keys(h.labParams).length;h.show={steps:e.steps.slice(),chapter:a},!s||Ce()<t-1e-9?fe({seed:"earth",scenario:"real",params:{},then:()=>na()}):na(),Mo(),e.focus==="charts"?us(e.highlight):De(A("stage")),e.highlight&&no(e.highlight)}function na(){let a=h.show;if(!a)return;for(;a.steps.length&&a.steps[0].age>=Ce()-1e-9;)a.steps.shift();let e=a.steps.shift();if(!e){h.show=null;let t=document.querySelector(`[data-look="${a.chapter.id}"]`);t&&(t.hidden=!1);return}h.running=!0,oe.send({type:"runTo",age:e.age,speed:e.speed})}function us(){it.matches||(h.fromLesson=!0,rt("watch")),requestAnimationFrame(()=>De(A("charts")))}function no(a){let e=document.querySelector(`.readout[data-explain="${a}"]`);e&&(e.classList.remove("flash"),e.offsetWidth,e.classList.add("flash"))}var ia={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>',pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>',again:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7l1.9.7A5 5 0 1 0 12 7v3L7.5 6 12 2z"/></svg>',step:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5.5v13l9-6.5zM16 5h2.6v14H16z"/></svg>'};function io(){A("speed").innerHTML=eo.map((e,t)=>`<option value="${t}">${e}</option>`).join(""),A("speed").value=String(h.speed),A("step").innerHTML=ia.step,A("restart").innerHTML=ia.again,A("play").addEventListener("click",()=>h.running?so():cs()),A("step").addEventListener("click",()=>{h.show=null,oe.send({type:"step",n:1})}),A("restart").addEventListener("click",()=>fe()),A("speed").addEventListener("change",e=>{h.speed=Number(e.target.value),pe.set("speed",h.speed),h.running&&!h.show&&oe.send({type:"speed",speed:h.speed})});let a=A("timeline");a.addEventListener("click",e=>{let t=a.getBoundingClientRect(),s=(e.clientX-t.left)/t.width,o=h.start-s*(h.start-h.end);o<Ce()-.002?(h.show=null,ds(Math.max(h.end,o),3),kt(`Running to ${o.toFixed(2)} billion years ago`)):kt("You can only run forward in time. Restart to go back.")})}function ro(){let a=h.running,e=A("play"),t=a?"pause":h.done?"again":"play";e.dataset.mode!==t&&(e.dataset.mode=t,e.innerHTML=`${ia[t]}<span>${t==="pause"?"Pause":t==="again"?"Again":"Play"}</span>`,e.setAttribute("aria-label",t==="pause"?"Pause":t==="again"?"Run again from the start":"Play")),A("age").textContent=Be(Ce());let s=(h.start-Ce())/(h.start-h.end);A("tl-fill").style.width=`${(s*100).toFixed(2)}%`,A("timeline").setAttribute("aria-valuenow",Ce().toFixed(3))}function kt(a){let e=A("toast");e.textContent=a,e.hidden=!1,clearTimeout(kt.timer),kt.timer=setTimeout(()=>e.hidden=!0,2600)}function fs(a){let e=A("error");e.textContent=`The simulation stopped: ${a.split(`
+`)[0]}`,e.hidden=!1,h.running=!1,h.dirty=!0}function lo(){A("layers").innerHTML=Gt.map(a=>`<button type="button" class="chip" data-layer="${a.key}" aria-pressed="${a.key===h.layer}">${I(a.label)}</button>`).join(""),A("layers").addEventListener("click",a=>{let e=a.target.closest("[data-layer]");e&&ps(e.dataset.layer)}),ms()}function ps(a){h.layer=a,pe.set("layer",a),Re.setLayer(a);for(let e of document.querySelectorAll("[data-layer]"))e.setAttribute("aria-pressed",String(e.dataset.layer===a));ms()}function ms(){let a=Gt.find(t=>t.key===h.layer)??Gt[0],e=t=>`rgb(${t.join(",")})`;A("legend").innerHTML=a.legend.map(([t,s])=>`<span class="key"><i style="background:${e(Qa[t])}"></i>${I(s)}</span>`).join("")+'<span class="key faint">brighter = more</span>'}function ho(){A("readouts").innerHTML=oa.map(a=>`<button type="button" class="readout" data-explain="${a.key}">
+      <span class="r-label">${I(a.short??a.label)}</span>
+      <span class="r-value" data-value="${a.key}">–</span>
+      <span class="r-unit" data-unit="${a.key}">${typeof a.unit=="string"?I(a.unit):""}</span></button>`).join("")}function co(){let a=le();if(a)for(let e of oa){let t=document.querySelector(`[data-value="${e.key}"]`),s=e.value(a);if(t&&t.dataset.html!==s&&(t.dataset.html=s,t.innerHTML=s),typeof e.unit=="function"){let o=document.querySelector(`[data-unit="${e.key}"]`),i=e.unit(a);o&&o.textContent!==i&&(o.textContent=i)}}}var gs={air:"Air",ice:"Ice",rock:"Rocks",life:"Life",volcano:"Volcanoes",lab:"You"};function uo(a){let e=le(),t;e?h.note&&a-h.note.at<7e3?t=`<span class="tag tag-${h.note.kind}">${gs[h.note.kind]??""}</span> ${I(h.note.text)}`:t=ns(e):t="Starting the planet…",t!==h.narratorHtml&&(h.narratorHtml=t,A("narrator").innerHTML=t)}function fo(){let a=getComputedStyle(document.documentElement),e=t=>a.getPropertyValue(t).trim();return{ink:e("--ink"),ink2:e("--ink-2"),ink3:e("--ink-3"),line:e("--line"),plot:e("--plot"),plotFade:e("--plot-fade"),ref:e("--ref"),ice:e("--ice-band"),iceSoft:e("--ice-soft"),sky:e("--sky"),amber:e("--amber"),rust:e("--rust"),teal:e("--teal")}}var xt=null;function po(a){xt||(xt=fo()),Me.points=h.points,Me.cursor=h.cursor,Me.draw(xt),h.chartsDirty=!1,h.lastCharts=a,mo()}function mo(){let a=h.cursor!==null?Me.pointAt(h.cursor):le();if(!a)return;let e=(o,i)=>`<button type="button" class="num" data-explain="${o}" data-age="${a.age}">${i}</button>`,t=h.lith[a.lith]?.label??"",s=h.cursor!==null?go(h.cursor):null;A("chart-caption").innerHTML=`<b>${h.cursor!==null?`At ${Be(a.age)}`:`Now, ${Be(a.age)}`} billion years ago:</b> oxygen ${e("o2",ot(a.pal,!0))} of today · methane ${e("ch4",ue(a.ch4,!0))} · CO₂ ${e("co2",ue(a.co2*1e6,!0))} · ${e("temp",nt(a.T))} · ice ${e("ice",as(a.iceLat))} · Δ³³S ${aa(a.d33S)} ‰ · δ¹³C ${aa(a.d13C)} ‰ · rock: ${I(t.toLowerCase())}`+(s?` · <span class="lip-name">lava flood: ${I(s)}</span>`:"")}function go(a){let e=(h.geometry?.lips??[]).find(t=>Math.abs(t.age-a)<.006);return e?e.name??"a large igneous province":null}function yo(){let a=A("charts"),e=t=>{let s=a.getBoundingClientRect(),o=Me.ageAt(t.clientX-s.left);h.cursor=h.points.length?Math.max(o,Ce()):null,h.chartsDirty=!0};a.addEventListener("pointermove",t=>{t.pointerType==="mouse"&&e(t)}),a.addEventListener("pointerdown",e),a.addEventListener("pointerleave",t=>{t.pointerType==="mouse"&&(h.cursor=null,h.chartsDirty=!0)})}function bo(a){let e=document.createElement("li");e.dataset.age=a.age,e.innerHTML=`<span class="ev-age">${Be(a.age)}</span><span class="tag tag-${a.kind}">${gs[a.kind]??""}</span><span class="ev-text">${I(a.text)}</span>`,A("events").prepend(e)}function wo(){let a=Object.entries(h.lith).map(([,e])=>`<span class="key"><i style="background:${e.color}"></i>${I(e.label)}</span>`).join("");A("lith-legend").innerHTML=`<span class="key faint">Rock strip:</span>${a}`}function rt(a){a==="watch"&&it.matches&&(a="learn"),h.tab=a,pe.set("tab",a);for(let e of document.querySelectorAll("[data-tab]")){let t=e.dataset.tab===a;e.setAttribute("aria-selected",String(t)),e.tabIndex=t?0:-1}for(let e of document.querySelectorAll(".panel"))e.classList.toggle("active",e.dataset.panel===a||e.dataset.panel==="watch"&&it.matches);A("back-to-lesson").hidden=!(h.fromLesson&&a==="watch"),(a==="watch"||it.matches)&&requestAnimationFrame(ha),a==="check"&&Bt()}function ls(){let a=A("panel-watch");it.matches?A("main-col").appendChild(a):A("side").insertBefore(a,A("panel-learn")),rt(h.tab),ha()}function ha(){Re.resize(),h.frame&&le()&&Re.setFrame(h.frame,le()),Me.resize(),h.chartsDirty=!0}function ra(){let a=ve[h.chapter],e=h.chapter,t=h.answers[a.id],s=a.predict,o=s?s.options.map((r,l)=>`<button type="button" class="option${t===void 0?"":r.right?" right":l===t?" wrong":" dim"}" data-option="${l}" ${t!==void 0?'aria-disabled="true"':""}>${I(r.text)}</button>`).join(""):"",i=t===void 0?"":s.options[t]?.right?"Right.":"Not quite.";A("panel-learn").innerHTML=`
+    <div class="chapter-nav">
+      <span class="kicker">Chapter ${e+1} of ${ve.length}</span>
+      <div class="dots">${ve.map((r,l)=>`<button type="button" class="dot${l===e?" on":""}${h.answers[r.id]!==void 0?" done":""}" data-chapter="${l}" aria-label="Chapter ${l+1}: ${I(r.title)}"></button>`).join("")}</div>
+    </div>
+    <article class="chapter">
+      <h2>${I(a.title)}</h2>
+      ${a.body.map(r=>`<p>${zt(r)}</p>`).join("")}
+      ${s?`<div class="predict">
+        <p class="kicker">Predict first</p>
+        <p class="predict-q">${I(s.q)}</p>
+        <div class="options">${o}</div>
+        <p class="predict-a" ${t===void 0?"hidden":""}><b>${i}</b> ${zt(s.explain)}</p>
+      </div>`:""}
+      <div class="show">
+        <button type="button" class="btn primary" data-show="${e}">${I(a.showLabel??"Show me")}</button>
+        ${a.look?`<p class="look" data-look="${a.id}" hidden><b>Look:</b> ${zt(a.look)}</p>`:""}
+      </div>
+    </article>
+    <div class="pager">
+      <button type="button" class="btn ghost" data-chapter="${e-1}" ${e===0?"disabled":""}>← Previous</button>
+      <button type="button" class="btn ghost" data-chapter="${e+1}" ${e===ve.length-1?"disabled":""}>Next →</button>
+    </div>
+    <details class="glossary">
+      <summary>Glossary</summary>
+      <dl>${Object.entries(sa).sort((r,l)=>r[1][0].localeCompare(l[1][0])).map(([r,[l,d]])=>`<dt id="term-${r}">${I(l)}</dt><dd>${I(d)}</dd>`).join("")}</dl>
+    </details>`}function xo(){A("panel-learn").addEventListener("click",a=>{let e=a.target.closest("[data-chapter]");if(e&&!e.disabled){let o=Number(e.dataset.chapter);o>=0&&o<ve.length&&(h.chapter=o,pe.set("chapter",o),ra(),De(A("panel-learn")));return}let t=a.target.closest("[data-option]");if(t){let o=ve[h.chapter];if(h.answers[o.id]!==void 0)return;h.answers[o.id]=Number(t.dataset.option),pe.set("answers",h.answers),ra();return}let s=a.target.closest("[data-show]");s&&oo(ve[Number(s.dataset.show)])})}var la=[{key:"cyanoAge",label:"Cyanobacteria appear",fmt:a=>a===0?"never":`${a.toFixed(2)} Ga`,restart:!0},{key:"reductants",label:"Reducing gas from volcanoes and hot rock",fmt:a=>`× ${a.toFixed(2)}`},{key:"ventIron",label:"Iron from hot springs",fmt:a=>`× ${a.toFixed(2)}`},{key:"weatheringP",label:"Phosphate washed in by rivers",fmt:a=>`× ${a.toFixed(2)}`},{key:"volcanicCO2",label:"CO₂ from volcanoes",fmt:a=>`× ${a.toFixed(2)}`},{key:"continents",label:"Land area",fmt:a=>`× ${a.toFixed(2)}`}],ko=[{key:"ferrotrophs",label:"Iron-eating microbes",note:"photosynthesisers that make rust, not oxygen"},{key:"events",label:"Lava floods",note:"large igneous provinces"},{key:"lull",label:"Magmatic lull",note:"quieter volcanoes, 2.45 to 2.2 Ga"}],vo=[{kind:"lip",label:"Flood of lava",note:"A large igneous province erupts now."},{kind:"oxygen",label:"Puff of oxygen",note:"About 2 % of today’s oxygen, added to the air."},{kind:"methane",label:"Burst of methane",note:"1,000 ppm, released at once."},{kind:"co2",label:"Add CO₂",note:"0.05 bar, about 50,000 ppm."},{kind:"freeze",label:"Freeze the planet",note:"Ice to the equator. Will it recover?"},{kind:"cyano",label:"Bring in cyanobacteria",note:"If they have not appeared yet."}],ys=!1;function bs(){let a={...h.defaults,...h.scenarios[h.scenario]?.params??{},...h.labParams},e=h.seed==="earth";A("panel-lab").innerHTML=`
+    <h2>Lab</h2>
+    <p class="lede">Change the planet, then run its history again. The same settings and seed always give the same history.</p>
+    <h3>Start from</h3>
+    <div class="scenarios" role="radiogroup">
+      ${Object.entries(h.scenarios).map(([t,s])=>`<button type="button" class="scenario" role="radio" aria-checked="${t===h.scenario}" data-scenario="${t}">
+            <b>${I(s.label)}</b><span>${I(s.blurb)}</span></button>`).join("")}
+    </div>
+    <h3>Lava floods</h3>
+    <div class="seed-row">
+      <button type="button" class="chip" data-seedmode="earth" aria-pressed="${e}">The real record</button>
+      <button type="button" class="chip" data-seedmode="random" aria-pressed="${!e}">Made up from a seed</button>
+      <label class="seed-field" ${e?"hidden":""}><span>Seed</span><input id="seed" type="text" inputmode="numeric" value="${e?"":I(h.seed)}" maxlength="12" autocomplete="off"></label>
+      <button type="button" class="btn ghost small" data-newseed ${e?"hidden":""}>New seed</button>
+    </div>
+    <h3>Change the planet</h3>
+    <p class="hint">Changes work from now on. Press Restart to run the whole history with them.</p>
+    <div class="sliders">
+      ${la.map(t=>{let s=h.ranges[t.key];return`<label class="slider"><span class="s-label">${I(t.label)}</span><output data-out="${t.key}">${I(t.fmt(a[t.key]))}</output>
+          <input type="range" id="lab-${t.key}" data-param="${t.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${a[t.key]}">
+          ${t.restart?'<span class="s-note">used from the next restart</span>':""}</label>`}).join("")}
+    </div>
+    <div class="toggles">
+      ${ko.map(t=>`<label class="toggle"><input type="checkbox" id="lab-${t.key}" data-param="${t.key}" ${a[t.key]?"checked":""}><span><b>${I(t.label)}</b> ${I(t.note)}</span></label>`).join("")}
+    </div>
+    <div class="lab-actions">
+      <button type="button" class="btn primary" data-labrestart>Restart with these settings</button>
+      <button type="button" class="btn ghost" data-labreset>Back to the defaults</button>
+    </div>
+    <h3>Do something now</h3>
+    <div class="injects">
+      ${vo.map(t=>`<button type="button" class="inject" data-inject="${t.kind}"><b>${I(t.label)}</b><span>${I(t.note)}</span></button>`).join("")}
+    </div>`,ys||Co()}function Mo(){h.ready&&bs()}function Co(){ys=!0;let a=A("panel-lab");a.addEventListener("click",e=>{let t=e.target.closest("[data-scenario]");if(t){h.show=null,fe({scenario:t.dataset.scenario,params:{},then:()=>kt(`${h.scenarios[t.dataset.scenario].label}: press Play`)});return}let s=e.target.closest("[data-seedmode]");if(s){let i=s.dataset.seedmode==="earth"?"earth":String(Math.floor(1e3+Math.random()*9e3));fe({seed:i});return}if(e.target.closest("[data-newseed]")){fe({seed:String(Math.floor(1e3+Math.random()*9e3))});return}if(e.target.closest("[data-labrestart]")){fe();return}if(e.target.closest("[data-labreset]")){fe({params:{}});return}let o=e.target.closest("[data-inject]");o&&(oe.send({type:"inject",kind:o.dataset.inject}),h.custom=!0,De(A("stage")))}),a.addEventListener("input",e=>{let t=e.target;if(!t.dataset.param||t.type!=="range")return;let s=la.find(i=>i.key===t.dataset.param),o=Number(t.value);a.querySelector(`[data-out="${s.key}"]`).textContent=s.fmt(o)}),a.addEventListener("change",e=>{let t=e.target;if(t.id==="seed"){let r=t.value.trim();r&&fe({seed:r});return}let s=t.dataset.param;if(!s)return;let o=t.type==="checkbox"?t.checked:Number(t.value);h.labParams[s]=o,la.find(r=>r.key===s)?.restart||(oe.send({type:"set",patch:{[s]:o}}),h.custom=!0)})}function Bt(){let a=h.checkView==="run"&&h.done?ta(h.points):h.validation??Qs,e=!h.validation&&h.checkView!=="run",t=h.done&&h.points.length>10,s=a?a.checks.map(o=>`<li class="check ${o.pass?"pass":"miss"}">
+          <div class="check-head"><span class="badge">${o.pass?"Match":"Miss"}</span><span class="check-what">${I(o.what)}</span></div>
+          <dl><dt>Model</dt><dd>${I(o.model)}</dd><dt>Rocks</dt><dd>${I(o.real)}</dd></dl>
+          ${!o.pass&&o.why?`<p class="why">${I(o.why)}</p>`:""}
+          <p class="source">${I(o.source)}</p></li>`).join(""):'<li class="check">Press the button to run the check.</li>';A("panel-check").innerHTML=`
+    <h2>Validation</h2>
+    <p class="lede">The model run from 3.0 to 1.8 billion years ago, set beside what the rocks record. Every check is fixed in advance; the misses are shown, not tuned away.</p>
+    <div class="check-tabs" role="radiogroup">
+      <button type="button" class="chip" data-checkview="model" aria-pressed="${h.checkView!=="run"}">Real-Earth model</button>
+      <button type="button" class="chip" data-checkview="run" aria-pressed="${h.checkView==="run"}" ${t?"":"disabled"}>Your run${t?"":" (finish it first)"}</button>
+    </div>
+    ${a?`<p class="score"><b>${a.passed}</b> of ${a.total} checks match the rocks</p>`:""}
+    <div class="check-run" ${h.checkView==="run"?"hidden":""}>
+      <span class="hint">${e?"Computed when this page was built.":"Computed just now, in your browser."}</span>
+      <button type="button" class="btn ghost small" data-validate>Run it again here</button>
+      <span class="progress" id="check-progress" hidden><span></span></span>
+    </div>
+    <ol class="checks">${s}</ol>
+    <h3>About the model</h3>
+    ${rs.map(o=>`<p>${I(o)}</p>`).join("")}`}function So(){A("panel-check").addEventListener("click",async a=>{let e=a.target.closest("[data-checkview]");if(e&&!e.disabled){h.checkView=e.dataset.checkview,Bt();return}let t=a.target.closest("[data-validate]");if(t&&!t.disabled){t.disabled=!0,t.textContent="Running…";let s=A("check-progress");s.hidden=!1;try{h.validation=await oe.validate(o=>{let i=A("check-progress");i&&(i.firstElementChild.style.width=`${Math.round(100*o.step/o.total)}%`)})}catch(o){fs(String(o.message??o))}Bt()}})}function ca(a){A("sheet-body").innerHTML=a,A("sheet").hidden=!1,A("sheet-backdrop").hidden=!1,A("sheet-close").focus({preventScroll:!0})}function qt(){A("sheet").hidden=!0,A("sheet-backdrop").hidden=!0}function Ao(a,e){let t=e!==void 0?h.points.find(o=>Math.abs(o.age-e)<1e-6)??le():le();if(!t)return;let s=os(a,t);s&&ca(`
+    <p class="kicker">${e!==void 0?`At ${Be(t.age)}`:`Now, ${Be(t.age)}`} billion years ago</p>
+    <h2>${I(s.title)}</h2>
+    <p class="sheet-value">${s.value}</p>
+    ${s.html.filter(Boolean).map(o=>`<p>${o}</p>`).join("")}
+    ${s.chart?`<button type="button" class="btn ghost small" data-gochart="${s.chart}">See it on the charts</button>`:""}`)}function Oo(a){let e=sa[a];e&&ca(`<p class="kicker">Glossary</p><h2>${I(e[0])}</h2><p>${I(e[1])}</p>`)}function To(){document.addEventListener("click",a=>{let e=a.target.closest(".term[data-term]");if(e){Oo(e.dataset.term);return}let t=a.target.closest("[data-explain]");if(t){Ao(t.dataset.explain,t.dataset.age!==void 0?Number(t.dataset.age):void 0);return}if(a.target.closest("[data-gochart]")){qt(),us();return}let o=a.target.closest("#events li");o&&(h.cursor=Number(o.dataset.age),h.chartsDirty=!0,De(A("charts"),"center"))}),A("sheet-close").addEventListener("click",qt),A("sheet-backdrop").addEventListener("click",qt),document.addEventListener("keydown",a=>{a.key==="Escape"&&!A("sheet").hidden&&qt()}),A("scene-help").addEventListener("click",()=>ca(`<p class="kicker">The picture</p><h2>How to read it</h2>${is.map(a=>`<p>${I(a)}</p>`).join("")}`)),A("tabs").addEventListener("click",a=>{let e=a.target.closest("[data-tab]");e&&(e.dataset.tab!=="watch"&&(h.fromLesson=!1),rt(e.dataset.tab))}),A("tabs").addEventListener("keydown",a=>{if(a.key!=="ArrowRight"&&a.key!=="ArrowLeft")return;let e=[...document.querySelectorAll("[data-tab]")].filter(o=>o.offsetParent!==null),t=e.findIndex(o=>o.dataset.tab===h.tab),s=e[(t+(a.key==="ArrowRight"?1:e.length-1))%e.length];rt(s.dataset.tab),s.focus()}),A("back-to-lesson").addEventListener("click",()=>{h.fromLesson=!1,rt("learn"),De(A("panel-learn"))})}function ws(a){Re.draw(a),h.dirty&&(h.dirty=!1,ro(),co()),uo(a),h.chartsDirty&&(a-h.lastCharts>150||!h.running)&&po(a),requestAnimationFrame(ws)}function $o(){io(),lo(),ho(),ra(),xo(),So(),yo(),To(),Bt(),Re.setLayer(h.layer),ls(),it.addEventListener?.("change",ls);let a=A("bar"),e=()=>document.documentElement.style.setProperty("--bar-h",`${a.offsetHeight}px`);new ResizeObserver(e).observe(a),e();let t=new ResizeObserver(()=>ha());t.observe(A("scene")),t.observe(A("charts")),window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{xt=null,h.chartsDirty=!0}),new MutationObserver(()=>{xt=null,h.chartsDirty=!0}).observe(document.documentElement,{attributes:!0,attributeFilter:["data-theme","class"]}),oe=Za(ao),window.__goe={state:h,host:oe},Fo(),requestAnimationFrame(ws)}function Fo(){let a=window.claude?.hot,e=!1,t=s=>{if(e)return;e=!0;let o=s&&typeof s=="object"?s:{},i=Number(o.age);fe({seed:typeof o.seed=="string"&&o.seed?o.seed:"earth",scenario:typeof o.scenario=="string"?o.scenario:"real",params:o.params&&typeof o.params=="object"?o.params:{},then:Number.isFinite(i)&&i<h.start-1e-9?()=>ds(i):null})};try{a?.snapshot?.(()=>({seed:h.seed,scenario:h.scenario,params:{...h.labParams},age:Ce()})),a?.ready?(a.ready(t),setTimeout(()=>t({}),1500)):t(a?.data??{})}catch{t({})}}$o();})();
+</script>

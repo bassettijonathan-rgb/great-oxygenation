@@ -1,0 +1,96 @@
+{
+  "checks": [
+    {
+      "id": "goe",
+      "what": "Oxygen first rises above 1/100,000 of today’s level",
+      "model": "2.47 Ga",
+      "real": "about 2.43 Ga (accept 2.50 to 2.30)",
+      "pass": true,
+      "source": "Gumsley et al. 2017; Warke et al. 2020"
+    },
+    {
+      "id": "mif",
+      "what": "Sulfur isotopes lose their mass-independent signal for good",
+      "model": "2.23 Ga",
+      "real": "about 2.22 to 2.33 Ga (accept 2.35 to 2.20)",
+      "pass": true,
+      "source": "Luo et al. 2016; Poulton et al. 2021"
+    },
+    {
+      "id": "methane",
+      "what": "Methane in the air at 2.7 Ga",
+      "model": "99 ppm",
+      "real": "tens to hundreds of ppm (accept 20 to 3,000)",
+      "pass": true,
+      "source": "Pavlov et al. 2000; Haqq-Misra et al. 2008"
+    },
+    {
+      "id": "warm",
+      "what": "Mean surface temperature at 2.7 Ga, under a fainter Sun",
+      "model": "8.7 °C",
+      "real": "liquid oceans, no ice near the equator (accept 0 to 40 °C)",
+      "pass": true,
+      "source": "Feulner 2012 (the faint young Sun problem)"
+    },
+    {
+      "id": "bif",
+      "what": "Oxide banded iron is laid down fastest before oxygen rises",
+      "model": "peak at 2.77 Ga",
+      "real": "big pulses near 2.7 and 2.5 Ga, before oxygen rose",
+      "pass": true,
+      "source": "Bekker et al. 2010"
+    },
+    {
+      "id": "huronian",
+      "what": "Ice reaches below 35° latitude (or the equator) between 2.45 and 2.22 Ga",
+      "model": "Snowball at 2.36 Ga",
+      "real": "Makganyene and Huronian glaciations, 2.43 to 2.29 Ga, some near the equator",
+      "pass": true,
+      "source": "Evans et al. 1997; Gumsley et al. 2017"
+    },
+    {
+      "id": "warmAfter",
+      "what": "No ice age from 2.15 to 1.8 Ga (ice stays poleward of 40°)",
+      "model": "ice line at least 42°",
+      "real": "no glacial deposits for over a billion years after 2.2 Ga",
+      "pass": true,
+      "source": "Hoffman 2013"
+    },
+    {
+      "id": "o2Later",
+      "what": "Oxygen in the air at 2.0 Ga",
+      "model": "0.95 % of today",
+      "real": "about 0.1 to 10 % of today (accept 0.1 to 40 %)",
+      "pass": true,
+      "source": "Kump 2008; Planavsky et al. 2014"
+    },
+    {
+      "id": "deep",
+      "what": "The deep sea still has no oxygen at 2.0 Ga",
+      "model": "0.00 µM of O₂, 23 µM of iron below 500 m",
+      "real": "deep water stayed iron-rich or sulfidic",
+      "pass": true,
+      "source": "Poulton & Canfield 2011"
+    },
+    {
+      "id": "lomagundi",
+      "what": "Carbonate δ¹³C climbs 5 ‰ above its Archean level between 2.25 and 2.0 Ga",
+      "model": "+2.8 ‰ at 2.25 Ga",
+      "real": "+8 to +12 ‰ (the Lomagundi event, 2.22 to 2.06 Ga)",
+      "pass": false,
+      "source": "Karhu & Holland 1996; Bekker 2022",
+      "why": "In the model the burst of phosphate from weathering long-buried sulfide rock comes right after the first rise of oxygen and is small, so carbon isotopes rise only a little, and too early. What drove the real shift of about +10 ‰ is still debated."
+    },
+    {
+      "id": "bifGap",
+      "what": "Banded iron fades after oxygen rises (2.2 to 1.9 Ga under half of 2.6 Ga onward)",
+      "model": "79 % of the earlier rate",
+      "real": "almost none from 2.4 until 1.9 Ga",
+      "pass": false,
+      "source": "Bekker et al. 2010",
+      "why": "Vents keep feeding iron into the model’s deep sea, and rust keeps forming where it meets oxygen near the surface. In the real ocean the deep water may have turned sulfidic, trapping the iron as pyrite; this model makes too little sulfate for that."
+    }
+  ],
+  "passed": 9,
+  "total": 11
+}

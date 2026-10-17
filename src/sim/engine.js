@@ -537,7 +537,7 @@ export class Engine {
     }
     if (fl.goe && !fl.mifGone && h.mif < 0.05) {
       fl.mifGone = true;
-      this.note('rock', 'Sulfur isotopes stop showing the mass-independent signal: the ozone layer now shields the air.');
+      this.note('rock', 'Sulfur isotopes lose their mass-independent signal: with oxygen in the air, all sulfur rains out as sulfate and the signal blends away.');
     }
     if (fl.mifGone && h.mif > 0.5) {
       fl.mifGone = false;
