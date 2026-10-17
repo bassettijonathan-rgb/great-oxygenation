@@ -1,0 +1,82 @@
+<title>Great Oxygenation</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A simulation of the Great Oxygenation Event: cyanobacteria, banded iron, the end of the methane greenhouse and Snowball Earth, 3.0 to 1.8 billion years ago.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*__CSS__*/
+</style>
+
+<div class="app" id="app">
+  <header class="masthead">
+    <h1>The Great Oxygenation</h1>
+    <p>How microbes filled the air with oxygen, froze the planet and rusted the sea, 3.0 to 1.8 billion years ago.</p>
+  </header>
+
+  <div class="bar" id="bar">
+    <button type="button" class="icon-btn play" id="play" aria-label="Play"></button>
+    <button type="button" class="icon-btn" id="step" aria-label="Step half a million years" title="Step half a million years"></button>
+    <div class="clock" aria-live="off">
+      <span class="age" id="age">3.000</span>
+      <span class="unit">billion years ago</span>
+    </div>
+    <label class="speed"><span class="sr">Speed</span><select id="speed" title="Speed"></select></label>
+    <button type="button" class="icon-btn" id="restart" aria-label="Restart from 3.0 billion years ago" title="Restart"></button>
+    <div class="timeline" id="timeline" role="slider" aria-label="Time: tap ahead to run there" aria-valuemin="1.8" aria-valuemax="3.0" aria-valuenow="3.0" tabindex="-1">
+      <div class="track"><div class="fill" id="tl-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <main class="main-col" id="main-col">
+      <section class="stage" id="stage" aria-label="The planet now">
+        <div class="error" id="error" role="alert" hidden></div>
+        <div class="scene-wrap">
+          <canvas id="scene" role="img" aria-label="A slice through the ocean from the coast to a mid-ocean ridge, with the sky, a volcano and a small globe"></canvas>
+          <button type="button" class="scene-help" id="scene-help" aria-label="How to read the picture">?</button>
+          <div class="toast" id="toast" role="status" hidden></div>
+        </div>
+        <div class="layers" id="layers" role="group" aria-label="Colour the water by"></div>
+        <div class="legend" id="legend"></div>
+        <p class="narrator" id="narrator"></p>
+        <div class="readouts" id="readouts"></div>
+      </section>
+    </main>
+
+    <aside class="side" id="side">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+        <button type="button" role="tab" data-tab="watch">Charts</button>
+        <button type="button" role="tab" data-tab="learn">Learn</button>
+        <button type="button" role="tab" data-tab="lab">Lab</button>
+        <button type="button" role="tab" data-tab="check">Validation</button>
+      </nav>
+      <section class="panel" data-panel="watch" id="panel-watch" aria-label="Charts">
+        <button type="button" class="btn ghost small" id="back-to-lesson" hidden>← Back to the lesson</button>
+        <canvas id="charts" role="img" aria-label="Charts of oxygen, greenhouse gases, temperature, sulfur and carbon isotopes and banded iron through time"></canvas>
+        <p class="chart-caption" id="chart-caption"></p>
+        <div class="legend lith-legend" id="lith-legend"></div>
+        <h3>What happened</h3>
+        <ol class="events" id="events"></ol>
+      </section>
+      <section class="panel" data-panel="learn" id="panel-learn" aria-label="Learn"></section>
+      <section class="panel" data-panel="lab" id="panel-lab" aria-label="Lab"></section>
+      <section class="panel" data-panel="check" id="panel-check" aria-label="Validation"></section>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    A teaching model, not a forecast of the past: one ocean slice stands for every coast, and many numbers are tuned.
+    <a href="https://github.com/bassettijonathan-rgb/great-oxygenation" target="_blank" rel="noopener">Code and notes</a>
+  </footer>
+</div>
+
+<div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Explanation" hidden>
+  <button type="button" class="sheet-close" id="sheet-close" aria-label="Close">×</button>
+  <div id="sheet-body"></div>
+</div>
+
+<script>
+/*__JS__*/
+</script>

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Build the page
+        run: npm run build
+      - name: The committed page matches a fresh build
+        run: git diff --exit-code -- dist/
+      - name: Long runs and validation
+        run: npm run test:long
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: The page in a browser
+        run: npm run test:browser

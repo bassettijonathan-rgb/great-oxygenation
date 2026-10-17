@@ -1,0 +1,20 @@
+{
+  "name": "great-oxygenation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A browser simulation of the Great Oxygenation Event, 3.0 to 1.8 billion years ago, played as a single-file page.",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build-artifact.mjs",
+    "test": "node --test \"test/unit/*.test.js\"",
+    "test:long": "node --test \"test/long/*.test.js\"",
+    "test:browser": "node test/browser/smoke.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
