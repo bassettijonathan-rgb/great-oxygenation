@@ -272,6 +272,7 @@ export class Ocean {
     this.srcFe = new Float64Array(N);
     this.remin = new Float64Array(N); // fraction of a column's export respired in each cell
     this.toFloor = new Float64Array(NX); // fraction reaching the seafloor
+    this.openW = new Float64Array(NX); // share of each column's surface free of ice
     this.diag = {
       // per cell, per m³ per year
       prodCyano: new Float64Array(N), // mmol C
@@ -429,9 +430,14 @@ export class Ocean {
     const { NX, NZ, N, vol, water, P, E, M, H, theta, cf } = this;
     const scale = this.scale;
     const D = this.diag;
-    const iceCols = Math.min(NX, Math.max(0, Math.round(env.iceFrac * NX)));
-    this.iceCols = iceCols;
-    const nOpen = NX - iceCols;
+    // Sea ice spreads from the open-ocean end towards the coast; the column
+    // at its edge is partly covered, so a little more ice means a little
+    // less light and gas exchange rather than a whole column at once.
+    const openF = Math.min(NX, Math.max(0, (1 - env.iceFrac) * NX));
+    this.iceCols = NX - openF;
+    const nOpen = Math.ceil(openF);
+    const openW = this.openW;
+    for (let i = 0; i < NX; i++) openW[i] = Math.min(1, Math.max(0, openF - i));
     const kw = o.pistonVelocity * this.dx;
     const satO = o.henryO2 * env.pO2;
     const satM = o.henryCH4 * env.pCH4;
@@ -493,7 +499,7 @@ export class Ocean {
       const back = this.toFloor[i] * (1 - burFrac[i] * pRet[i]);
       for (let k = 0; k < nPh && k <= kb; k++) {
         const n = this.idx(i, k);
-        const L = this.light[k] * env.lightFactor;
+        const L = this.light[k] * env.lightFactor * openW[i];
         lamC[n] = (o.muCyano * env.cyano * L * tf) / (o.CP * (P[n] + o.kP));
         lamF[n] = cf[n] / (o.CP * vol[n] * Math.max(P[n], 1e-3));
         const u = (lamC[n] + lamF[n]) * vol[n];
@@ -587,11 +593,11 @@ export class Ocean {
     }
     for (let i = 0; i < nOpen; i++) {
       const n = this.idx(i, 0);
-      gasK[n] = kw;
-      lin[n] += kw * satO;
+      gasK[n] = kw * openW[i];
+      lin[n] += kw * openW[i] * satO;
       for (let k = 0; k < nPh && k <= this.kb[i]; k++) {
         const m = this.idx(i, k);
-        const L = this.light[k] * env.lightFactor;
+        const L = this.light[k] * env.lightFactor * openW[i];
         ferroMax[m] = o.muFerro * env.ferro * L * tf * (P[m] / (P[m] + o.kP)) * vol[m];
       }
     }
@@ -689,7 +695,7 @@ export class Ocean {
     const Fe = this.Fe;
     // how the flux to the air falls as oxygen in the air rises
     rhs.fill(0);
-    for (let i = 0; i < nOpen; i++) rhs[this.idx(i, 0)] = kw;
+    for (let i = 0; i < nOpen; i++) rhs[this.idx(i, 0)] = kw * openW[i];
     const R = this.tmp;
     mE.solve(rhs, R);
     let o2Slope = 0;
@@ -698,8 +704,8 @@ export class Ocean {
       const n = this.idx(i, 0);
       const s = Math.sqrt(E[n] * E[n] + eps * eps);
       const a = 0.5 * (1 + E[n] / s);
-      o2Slope += kw * Math.max(0, 1 - a * R[n]);
-      o2Out += kw * (O2[n] - satO);
+      o2Slope += kw * openW[i] * Math.max(0, 1 - a * R[n]);
+      o2Out += kw * openW[i] * (O2[n] - satO);
     }
 
     // ---- what happened in each cell: respiration with O₂ or without,
@@ -792,8 +798,8 @@ export class Ocean {
     }
     for (let i = 0; i < nOpen; i++) {
       const n = this.idx(i, 0);
-      mM.add(n, n, kw);
-      rhs[n] += kw * satM;
+      mM.add(n, n, kw * openW[i]);
+      rhs[n] += kw * openW[i] * satM;
     }
     mM.factor();
     mM.solve(rhs, M);
@@ -811,12 +817,12 @@ export class Ocean {
       lagMox += 2 * fOx[n] * o.moxRate * (Mold[n] - M[n]) * vol[n];
     }
     let ch4Out = 0;
-    for (let i = 0; i < nOpen; i++) ch4Out += kw * (M[this.idx(i, 0)] - satM);
+    for (let i = 0; i < nOpen; i++) ch4Out += kw * openW[i] * (M[this.idx(i, 0)] - satM);
     rhs.fill(0);
-    for (let i = 0; i < nOpen; i++) rhs[this.idx(i, 0)] = kw;
+    for (let i = 0; i < nOpen; i++) rhs[this.idx(i, 0)] = kw * openW[i];
     mM.solve(rhs, R);
     let ch4Slope = 0;
-    for (let i = 0; i < nOpen; i++) ch4Slope += kw * Math.max(0, 1 - R[this.idx(i, 0)]);
+    for (let i = 0; i < nOpen; i++) ch4Slope += kw * openW[i] * Math.max(0, 1 - R[this.idx(i, 0)]);
 
     // ---- sulfide: oxidised where there is oxygen, caught by iron as iron
     // sulfide where there is Fe²⁺, otherwise it builds up (euxinia)

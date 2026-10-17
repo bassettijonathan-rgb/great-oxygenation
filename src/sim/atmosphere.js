@@ -16,7 +16,12 @@ export const AIR = {
   escape: 3.7e-5, // per year: fraction of CH₄ whose hydrogen escapes to space
   kOmega: 1e15, // mol O₂: above this, volcanic H₂ burns with O₂ instead of feeding methanogens
   kEscapeO2: 1e14, // mol O₂: below this, escape takes its oxygen from water
+  abioticO2: 1e9, // mol/yr: sunlight splitting water and CO₂ high up, with the hydrogen lost to space
+  abioticCH4: 1e10, // mol/yr: seeps and hot springs on land, there even when the sea is frozen over
 };
+
+// Counts slivers of time the solver had to skip (should stay at zero).
+export const airStats = { skipped: 0 };
 
 const A = [0.003, -0.1655, 3.2305, -25.8343, 71.5398];
 const polyLog = (phi) => (((A[0] * phi + A[1]) * phi + A[2]) * phi + A[3]) * phi + A[4];
@@ -57,24 +62,31 @@ export function airRates(O, M, inp) {
   const photo = Ps * Math.pow(Math.max(M, 0), 0.7); // mol O₂/yr (half as much CH₄)
   const om = O / (O + AIR.kOmega);
   const volcO2 = inp.reductant * om; // mol O₂/yr burned by volcanic gases
-  const volcCH4 = 0.5 * inp.reductant * (1 - om); // mol CH₄/yr from H₂ via methanogens
+  // Methanogens in the sea turn volcanic H₂ into CH₄; where ice seals the
+  // sea the H₂ stays in the air and escapes to space instead.
+  const meth = inp.escapeOn ? inp.methanogens ?? 1 : 1;
+  const volcCH4 = 0.5 * inp.reductant * (1 - om) * meth; // mol CH₄/yr
+  const volcH2 = inp.reductant * (1 - om) * (1 - meth); // mol O₂-equivalent/yr of H₂ lost to space
   const esc = inp.escapeOn ? AIR.escape * M : 0; // mol CH₄/yr lost to space
   const escO2 = esc * (O / (O + AIR.kEscapeO2));
   const pal = O / AIR.PAL;
   const weath = inp.weathering * Math.sqrt(Math.max(0, pal)); // mol O₂/yr
+  const weathB = inp.backlog ? (inp.backlog * O) / (O + inp.backlogHalf) : 0; // old sulfides, mol O₂/yr
   const seaO2 = inp.oceanO2 - inp.oceanO2Slope * (O / AIR.moles);
   const seaCH4 = inp.oceanCH4 - inp.oceanCH4Slope * (M / AIR.moles);
   return {
     photo,
     volcO2,
     volcCH4,
+    volcH2,
     esc,
     escO2,
     weath,
+    weathB,
     seaO2,
     seaCH4,
-    dO: seaO2 - volcO2 - photo - escO2 - weath,
-    dM: seaCH4 + volcCH4 - 0.5 * photo - esc,
+    dO: AIR.abioticO2 + seaO2 - volcO2 - photo - escO2 - weath - weathB,
+    dM: AIR.abioticCH4 + seaCH4 + volcCH4 - 0.5 * photo - esc,
   };
 }
 
@@ -82,16 +94,16 @@ export function airRates(O, M, inp) {
 // solved by Newton's method in log space. `inp` holds the fluxes from the
 // ocean (linear in partial pressure), the volcanic reductant flux, the
 // oxidative weathering scale and the switches.
-const LO_O = Math.log(1e6);
+const LO_O = Math.log(1e3);
 const HI_O = Math.log(AIR.moles);
-const LO_M = Math.log(1e8);
+const LO_M = Math.log(1e6);
 const HI_M = Math.log(AIR.moles * 0.05);
 
 // One implicit Euler step of h years from (O0, M0). Residuals are taken
 // relative to the new amounts so that oxygen at 1e-8 and 1e-1 of today's
 // level converge alike; Newton's method with a backtracking line search.
 // Returns null if it does not converge, so the caller can take shorter steps.
-function implicitStep(O0, M0, inp, h) {
+export function implicitStep(O0, M0, inp, h) {
   const g = [0, 0];
   const gu = [0, 0];
   const gv = [0, 0];
@@ -150,7 +162,7 @@ function implicitStep(O0, M0, inp, h) {
 
 export function stepAir(state, inp, dt, sub = 16) {
   let O = Math.min(Math.max(state.O2, 1e6), AIR.moles);
-  let M = Math.min(Math.max(state.CH4, 1e8), AIR.moles * 0.05);
+  let M = Math.min(Math.max(state.CH4, 1e6), AIR.moles * 0.05);
   // Fixed sub-steps, each split further where the solver struggles (the
   // switch between an oxygen-free and an oxygen-rich air is very stiff).
   const hMax = dt / sub;
@@ -169,6 +181,7 @@ export function stepAir(state, inp, dt, sub = 16) {
       h = step / 4;
     } else {
       // give up on this sliver of time and move on
+      airStats.skipped++;
       left -= step;
     }
   }

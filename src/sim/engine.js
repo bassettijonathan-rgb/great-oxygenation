@@ -6,12 +6,14 @@
 
 import { Rng } from './rng.js';
 import { Ocean } from './ocean.js';
-import { Climate, CLIMATE, greenhouse, hazeAmount, forcingCH4, forcingCO2 } from './climate.js';
+import { Climate, CLIMATE, greenhouse, hazeAmount } from './climate.js';
 import { AIR, stepAir, ozoneColumn } from './atmosphere.js';
-import { sunLuminosity, heatFlow, landArea, subaerialShare } from './forcing.js';
+import { sunLuminosity, heatFlow, landArea, subaerialShare, magmaticLull } from './forcing.js';
 import { DEFAULTS, SCENARIOS, K } from './params.js';
 
 const HF0 = heatFlow(K.startAge);
+const FAST = ['CH4', 'O2'];
+const OXIC = 1e-5 * AIR.PAL; // above this the ozone layer shields the air
 const SUB0 = subaerialShare(K.startAge);
 const MOL_PER_UM = K.oceanVolume * 1e-3; // mol of a solute per µM over the whole ocean
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
@@ -24,7 +26,26 @@ const smooth01 = (x) => {
 // and vent iron for about a million years, then leave fresh basalt that
 // weathers fast (drawing down CO₂, washing in phosphorus) for tens of
 // millions. Their ages and sizes come from the seed.
+// Large igneous provinces of the real record (Ernst & Youbi 2017; Gumsley
+// et al. 2017), used for the default seed; any other seed draws its own.
+export const REAL_LIPS = [
+  { age: 2.775, size: 1.2, name: 'Mount Roe (Fortescue)' },
+  { age: 2.72, size: 1.0, name: 'Ventersdorp' },
+  { age: 2.575, size: 0.8, name: 'Great Dyke' },
+  { age: 2.505, size: 0.8, name: 'Mistassini' },
+  { age: 2.46, size: 1.4, name: 'Matachewan' },
+  { age: 2.426, size: 1.4, name: 'Ongeluk' },
+  { age: 2.41, size: 0.8, name: 'Widgiemooltha' },
+  { age: 2.367, size: 0.7, name: 'Bangalore' },
+  { age: 2.217, size: 1.2, name: 'Nipissing' },
+  { age: 2.11, size: 0.8, name: 'Marathon' },
+  { age: 2.055, size: 1.4, name: 'Bushveld' },
+  { age: 1.98, size: 0.8, name: 'Jatulian' },
+  { age: 1.88, size: 1.6, name: 'Circum-Superior' },
+];
+
 export function makeLips(seed) {
+  if (seed === 'earth') return REAL_LIPS.map((e) => ({ ...e }));
   const rng = new Rng(`${seed}:lips`);
   const list = [];
   let age = K.startAge;
@@ -66,9 +87,9 @@ export const LITH = {
 export class Engine {
   constructor({ seed = 'earth', scenario = 'real', params = {} } = {}) {
     this.ocean = new Ocean();
-    this.oceanStart = this.ocean.saveState();
     this.climate = new Climate();
     this.climateStart = new Float64Array(this.climate.n);
+    this.climateMid = new Float64Array(this.climate.n);
     this.reset({ seed, scenario, params });
   }
 
@@ -87,10 +108,12 @@ export class Engine {
     this.SO4 = 2;
     this.crustOx = 0;
     this.mifMemory = 1;
+    this.backlog = K.backlog0;
+    this.slope = { CH4: 0, O2: 0 }; // how the coupled loop answers a change in the guess
     this.history = [];
     this.core = [];
     this.log = [];
-    this.flags = { cyano: false, goe: false, snowball: false, lastThaw: -1 };
+    this.flags = { cyano: false, goe: false, snowball: false, lastThaw: -1, lull: false, glacial: false, methaneLow: false };
     this.ocean.reset();
     this.climate.T.fill(20);
     this.climate.dust = 0;
@@ -121,11 +144,14 @@ export class Engine {
     const hf = heatFlow(age) / HF0;
     const land = clamp(landArea(age) * p.continents, 0.02, 1.5);
     const sub = subaerialShare(age);
+    const lull = p.lull ? magmaticLull(age) : 0;
     return {
       lum: sunLuminosity(age),
       hf,
       land,
       sub,
+      lull,
+      quiet: 1 - K.lullDepth * lull, // volcanoes and ridges, × usual
       subFactor: (1 - K.subaerialOxidised * sub) / (1 - K.subaerialOxidised * SUB0),
     };
   }
@@ -194,18 +220,17 @@ export class Engine {
       p.reductants *
       ((1 - K.metaShare) * f.hf * f.hf * f.subFactor + K.metaShare * f.hf * crustFactor) *
       (1 + 0.2 * ev.pulse);
-    const V = K.volcCO2 * p.volcanicCO2 * f.hf * (1 + 0.15 * ev.pulse);
-    const Svolc = K.volcS * f.hf * (1 + 0.3 * ev.pulse);
+    const V = K.volcCO2 * p.volcanicCO2 * f.hf * f.quiet * (1 + 0.15 * ev.pulse);
+    const Svolc = K.volcS * f.hf * f.quiet * (1 + 0.3 * ev.pulse);
     const air0 = { O2: this.air.O2, CH4: this.air.CH4 };
     const so40 = Math.max(this.SO4, 1e-4);
     const T0 = this.climateStart;
     T0.set(cl.T);
-    this.ocean.saveState(this.oceanStart);
     const env = {
       pO2: 0,
       pCH4: 0,
       SO4: so40,
-      ventFe: K.ventFe * p.ventIron * f.hf * f.hf * (1 + 0.3 * ev.pulse),
+      ventFe: K.ventFe * p.ventIron * f.hf * f.hf * f.quiet * (1 + 0.3 * ev.pulse),
       ventCH4: K.ventCH4 * f.hf,
       riverP: 0,
       riverFe: 0,
@@ -217,7 +242,7 @@ export class Engine {
     };
 
     // Everything fast, for a guess of the air at the end of the step.
-    const evaluate = (g, sweeps, settleClimate) => {
+    const evaluate = (g, settleClimate) => {
       if (settleClimate) {
         cl.restore(T0);
         cl.settle(f.lum, greenhouse(pc, (g.CH4 / AIR.moles) * 1e6, g.CH4 / AIR.moles));
@@ -234,34 +259,38 @@ export class Engine {
       env.pO2 = g.O2 / AIR.moles;
       env.pCH4 = g.CH4 / AIR.moles;
       env.SO4 = g.SO4;
+      // old sulfides weathering in oxygen (FeS₂/yr if the guess is right)
+      const backlogFull = K.backlogRate * this.backlog * f.land * open;
+      const backlogNow = (backlogFull * pal) / (pal + K.backlogHalf);
       env.riverP =
-        K.riverP *
         p.weatheringP *
-        ((2 / 12) * (W / K.riverPRef) + (5 / 12) * (Wcarb / K.carbWeathK) + (5 / 12) * K.oxidativeP * f.land * open * Math.sqrt(pal));
+        (K.riverP *
+          ((2 / 12) * (W / K.riverPRef) + (5 / 12) * (Wcarb / K.carbWeathK) + (5 / 12) * K.oxidativeP * f.land * open * Math.sqrt(pal)) +
+          K.backlogP * backlogNow);
       const anoxicLand = 1 - smooth01((Math.log10(Math.max(pal, 1e-12)) + 5) / 2);
       env.riverFe = K.riverFe * f.land * open * (W / K.riverPRef) * anoxicLand;
       const haze = hazeAmount(env.pCH4, pc);
       env.lightFactor = 1 - 0.3 * haze;
       env.iceFrac = ice;
       env.tempFactor = clamp(2 ** ((tFree - 15) / 10), 0.25, 3);
-      this.ocean.loadState(this.oceanStart);
-      let oc;
-      for (let s = 0; s < sweeps; s++) oc = this.ocean.solve(env, dt);
+      // the sea starts from where the last guess left it
+      const oc = this.ocean.solve(env, dt);
       const inp = {
         shield: p.ozoneShield,
         escapeOn: p.hydrogenEscape,
         reductant: Rv,
+        methanogens: clamp(open / 0.1, 0, 1), // only a sea frozen almost to the equator keeps H₂ from them
         weathering: oxWeath,
-        oceanO2: oc.o2ToAir + oc.o2Slope * env.pO2,
-        oceanO2Slope: oc.o2Slope,
-        oceanCH4: oc.ch4ToAir + oc.ch4Slope * env.pCH4,
-        oceanCH4Slope: oc.ch4Slope,
+        backlog: 3.75 * backlogFull,
+        backlogHalf: K.backlogHalf * AIR.PAL,
+        ...seaFlux('O2', oc.o2ToAir, oc.o2Slope, env.pO2),
+        ...seaFlux('CH4', oc.ch4ToAir, oc.ch4Slope, env.pCH4),
       };
       const air = { O2: air0.O2, CH4: air0.CH4 };
       const ar = stepAir(air, inp, dt);
       // sulfate: from volcanoes and from pyrite weathered in oxygen; removed
       // as pyrite in the sea and as gypsum where seawater dries up
-      const Spyr = (K.pyriteShare * ar.weath) / 2.25;
+      const Spyr = (K.pyriteShare * ar.weath) / 2.25 + (2 * ar.weathB) / 3.75;
       const sg = Math.max(g.SO4, 1e-4);
       const evap = K.evapK * f.land * (sg / 28000) ** 2;
       const dPyr = (oc.pyrite / sg) * (400 / (400 + sg));
@@ -271,46 +300,110 @@ export class Engine {
       const SO4 = Math.max(1e-4, so40 + (dt * (Svolc + Spyr - pyrAt0 - evapAt0)) / (MOL_PER_UM + dt * (dPyr + dEvap)));
       return { O2: air.O2, CH4: air.CH4, SO4, oc, ar, W, Wsf, Wcarb, ice, tFree, haze, Spyr, evap };
     };
-    const gap = (a, b) =>
-      Math.max(Math.abs(Math.log10(a.O2 / b.O2)), Math.abs(Math.log10(a.CH4 / b.CH4)), Math.abs(Math.log10(a.SO4 / b.SO4)));
-
-    // Usually the start state is close enough: one ocean solve.
-    let guess = { O2: air0.O2, CH4: air0.CH4, SO4: so40 };
-    let r = evaluate(guess, 1, false);
-    this.coupleIters = 1;
-    if (this.debugCouple) this.debugCouple(0, guess, r, env);
-    if (gap(r, guess) > 0.3) {
-      // Near a tipping point: move the guess part way towards the answer,
-      // letting the sea settle for each guess, until the two agree.
-      guess = { O2: Math.sqrt(r.O2 * guess.O2), CH4: Math.sqrt(r.CH4 * guess.CH4), SO4: Math.sqrt(r.SO4 * guess.SO4) };
-      for (let it = 1; it <= 10; it++) {
-        r = evaluate(guess, 4, true);
-        this.coupleIters = it + 1;
-        if (this.debugCouple) this.debugCouple(it, guess, r, env);
-        if (gap(r, guess) < 0.1) break;
-        for (const k of ['O2', 'CH4', 'SO4']) guess[k] *= 10 ** clamp(0.5 * Math.log10(r[k] / guess[k]), -1, 1);
+    // ---- Solve the fast parts together. The unknowns are the methane and
+    // oxygen the air ends the step with (sulfate follows along). Each guess
+    // sets the climate, the rivers and the sea; the air then runs through
+    // the step with the fluxes they give. Most steps agree at once. Near a
+    // tipping point the loop is steep (more methane → warmer → more
+    // phosphorus → more oxygen → less methane), so each unknown moves by
+    // Newton's method, using the slope seen in earlier guesses and kept from
+    // step to step, inside the range where its answer changes sign.
+    const L = Math.log10;
+    const slope = this.slope;
+    const tolOf = (k, g) => (k === 'O2' ? 0.02 : g.CH4 > 1e-6 * AIR.moles ? 0.01 : 0.05);
+    const miss = (g, r) => {
+      let worst = Math.abs(L(r.SO4 / g.SO4)) / 0.02;
+      for (const k of FAST) worst = Math.max(worst, Math.abs(L(r[k] / g[k])) / tolOf(k, g));
+      return worst; // ≤ 1: the guess and the answer agree
+    };
+    const ice0 = cl.iceFrac;
+    let g = { O2: air0.O2, CH4: air0.CH4, SO4: so40 };
+    let r = evaluate(g, false);
+    let err = miss(g, r);
+    const tried = [{ g, r, err }];
+    const lo = { CH4: -Infinity, O2: -Infinity }; // highest guess whose answer came out higher
+    const hi = { CH4: Infinity, O2: Infinity }; // lowest guess whose answer came out lower
+    while (err > 1 && tried.length < 10) {
+      const next = { SO4: r.SO4 };
+      for (const k of FAST) {
+        const s = L(g[k]);
+        const F = L(r[k]) - s;
+        if (k === 'O2' && g.O2 > OXIC !== r.O2 > OXIC) {
+          // the air crossed the oxygen switch: let it lead
+          next.O2 = r.O2;
+          lo.O2 = -Infinity;
+          hi.O2 = Infinity;
+          continue;
+        }
+        if (F > 0) lo[k] = Math.max(lo[k], s);
+        else hi[k] = Math.min(hi[k], s);
+        if (lo[k] >= hi[k]) {
+          lo[k] = -Infinity;
+          hi[k] = Infinity;
+        }
+        let sn = s + clamp(-F / (slope[k] - 1), -0.7, 0.7);
+        if ((sn <= lo[k] || sn >= hi[k]) && isFinite(lo[k]) && isFinite(hi[k])) sn = 0.5 * (lo[k] + hi[k]);
+        next[k] = 10 ** sn;
       }
+      const prev = { g, r };
+      g = next;
+      r = evaluate(g, true);
+      err = miss(g, r);
+      tried.push({ g, r, err });
+      if (this.debug) this.debug(tried.length, g, r, err, slope);
+      for (const k of FAST) {
+        const ds = L(g[k] / prev.g[k]);
+        if (Math.abs(ds) > 1e-3) slope[k] = clamp(L(r[k] / prev.r[k]) / ds, -60, 0.9);
+      }
+    }
+    this.coupleIters = tried.length;
+    if (err > 1) {
+      // No agreement: the step sits on an edge. Where the climate itself
+      // jumps (into or out of a snowball) the jump wins, as it would in the
+      // real world; otherwise take the closest guess.
+      const jumped = tried.filter((t) => t.r.ice > 0.9 !== ice0 > 0.9);
+      const pick = (jumped.length ? jumped : tried).reduce((a, b) => (b.err < a.err ? b : a));
+      if (pick.r !== r) r = evaluate(pick.g, true);
     }
     const { oc, ar, W, Wsf, Wcarb, haze, tFree, Spyr, evap } = r;
     this.air.O2 = r.O2;
     this.air.CH4 = r.CH4;
     this.SO4 = r.SO4;
-    if (!spin) this.crustOx += (2 * ar.esc - ar.escO2) * dt;
+    if (!spin) {
+      this.crustOx += (2 * ar.esc - ar.escO2 + ar.volcH2) * dt;
+      this.backlog = Math.max(0, this.backlog - (ar.weathB / 3.75) * dt);
+    }
 
     // ---- carbon: volcanoes and burning old organic matter add CO₂;
-    // weathering of rock and burial of organic matter take it out
+    // weathering of rock and burial of organic matter take it out. The CO₂
+    // at the end of the step is found with the climate settling for each
+    // guess: a warm planet weathers fast, and as CO₂ falls it cools and
+    // weathers slower. Leaving that out lets a hot planet just out of a
+    // snowball pull its CO₂ far below balance in one step.
     const open = 1 - r.ice;
     const Worg = K.kerogenShare * ar.weath;
-    const src = V + Worg - W - Wsf - oc.orgBur;
     let cap = K.carbonCap * (1 + K.oceanCarbon * open);
     if (spin) cap *= 0.05;
-    const dWdp = (K.weathCO2 * W + K.seafloorCO2 * Wsf) / pc;
-    this.pCO2 = Math.max(1e-5, pc + (dt * src) / (cap + dt * dWdp));
+    const ch4ppm = (this.air.CH4 / AIR.moles) * 1e6;
+    const Tc = this.climateMid;
+    Tc.set(cl.T);
+    const settleAt = (q) => {
+      cl.restore(Tc);
+      cl.settle(f.lum, greenhouse(q, ch4ppm, this.air.CH4 / AIR.moles));
+    };
+    const resid = (u) => {
+      const q = Math.exp(u);
+      settleAt(q);
+      const tf = freeTemp(cl);
+      const w = K.weathK * f.land * basalt * (q / K.pRef) ** K.weathCO2 * Math.exp((tf - K.weathT0) / K.weathTe) * (1 - cl.iceFrac);
+      const wsf = K.seafloorK * f.hf * (q / K.pRef) ** K.seafloorCO2;
+      return q - pc - (dt * (V + Worg - oc.orgBur - w - wsf)) / cap;
+    };
+    this.pCO2 = solveRising(resid, Math.log(pc), Math.log(1e-5), Math.log(10));
 
     // ---- climate for the new air
-    const ch4ppm = (this.air.CH4 / AIR.moles) * 1e6;
     const F = greenhouse(this.pCO2, ch4ppm, this.air.CH4 / AIR.moles);
-    cl.settle(f.lum, F);
+    settleAt(this.pCO2);
     if (!spin) cl.weather(dt);
 
     this.now = { f, ev, W, Wsf, Wcarb, V, Worg, Rv, riverP: env.riverP, riverFe: env.riverFe, env, oc, ar, haze, F, Svolc, Spyr, evap, tFree, crustFactor };
@@ -378,7 +471,10 @@ export class Engine {
       ozone: ozoneColumn(pal),
       cyano: this.cyanoAt(this.age),
       lip: n.ev.pulse > 0 ? 1 : 0,
+      lull: n.f.lull,
       crust: n.crustFactor,
+      backlog: this.backlog / K.backlog0,
+      weathB: n.ar.weathB,
       lith: '',
     };
     h.lith = this.lithology(h);
@@ -411,6 +507,25 @@ export class Engine {
   // Notes for the timeline and the narrator.
   watch(h) {
     const fl = this.flags;
+    const span = K.stepMyr / 1000;
+    for (const e of this.lips) {
+      if (e.age <= h.age || e.age > h.age + span) continue;
+      const what = e.name ? `the ${e.name} large igneous province` : 'a large igneous province';
+      const more = fl.lips ? '' : ' For a million years it breathes out CO₂ and reducing gas; then its fresh basalt weathers fast and draws CO₂ down.';
+      fl.lips = (fl.lips ?? 0) + 1;
+      this.note('volcano', `Lava floods out: ${what}.${more}`);
+    }
+    if (!fl.lull && h.lull > 0.5) {
+      fl.lull = true;
+      this.note('volcano', 'Volcanoes and mid-ocean ridges go quiet (the magmatic lull): less CO₂ and less iron come out of the Earth.');
+    } else if (fl.lull && h.lull < 0.5) {
+      fl.lull = false;
+      this.note('volcano', 'Volcanoes wake up again: more CO₂ warms the planet.');
+    }
+    if (fl.cyano && !fl.goe && !fl.methaneLow && h.ch4 < 10) {
+      fl.methaneLow = true;
+      this.note('air', 'Methane has fallen below 10 ppm: the methane greenhouse is fading and the planet is cooling.');
+    }
     if (!fl.cyano && h.cyano > 0.5) {
       fl.cyano = true;
       this.note('life', 'Cyanobacteria spread through the sunlit sea, splitting water and giving off oxygen.');
@@ -431,12 +546,61 @@ export class Engine {
     const frozen = h.iceLat < 5;
     if (frozen && !fl.snowball) {
       fl.snowball = true;
+      fl.glacial = true;
       this.note('ice', 'Ice reaches the equator: a Snowball Earth.');
     } else if (!frozen && fl.snowball && h.iceLat > 30) {
       fl.snowball = false;
+      fl.glacial = h.iceLat < 45;
       fl.lastThaw = this.step;
       this.note('ice', 'The snowball melts: volcanic CO₂ has built up enough greenhouse to break the ice.');
     }
+    if (!fl.glacial && h.iceLat < 40) {
+      fl.glacial = true;
+      this.note('ice', 'Ice sheets spread to the middle latitudes: an ice age.');
+    } else if (fl.glacial && h.iceLat > 45) {
+      fl.glacial = false;
+      this.note('ice', 'The ice retreats towards the poles.');
+    }
+  }
+
+  // The shape of the ocean slice, sent once to whoever draws it.
+  geometry() {
+    const oc = this.ocean;
+    return {
+      NX: oc.NX,
+      NZ: oc.NZ,
+      dx: oc.dx,
+      zi: Array.from(oc.zi),
+      floor: Array.from(oc.floor),
+      kb: Array.from(oc.kb),
+      water: Array.from(oc.water),
+      bands: this.climate.n,
+      lips: this.lips.map((e) => ({ ...e })),
+    };
+  }
+
+  // Everything the page draws for the present moment (fields as float32).
+  frame() {
+    const oc = this.ocean;
+    const d = oc.diag;
+    const f32 = (a) => Float32Array.from(a);
+    return {
+      step: this.step,
+      age: this.age,
+      done: this.done,
+      O2: f32(oc.O2),
+      Fe: f32(oc.Fe),
+      P: f32(oc.P),
+      CH4: f32(oc.M),
+      H2S: f32(oc.H),
+      prod: f32(d.prodCyano),
+      ferro: f32(d.prodFerro),
+      rust: f32(d.rust),
+      open: f32(oc.openW),
+      T: f32(this.climate.T),
+      iceLat: this.climate.iceLat,
+      dust: this.climate.dust,
+    };
   }
 
   historySince(step) {
@@ -444,6 +608,56 @@ export class Engine {
     while (i > 0 && this.history[i - 1].step > step) i--;
     return this.history.slice(i);
   }
+}
+
+// The sea's flux of a gas to the air, as a straight line in its partial
+// pressure through the value at the guess. Where the sea takes up more of
+// the gas than the line allows, it becomes a pure uptake that falls to zero
+// with the gas: an empty sky gives the sea nothing to take.
+function seaFlux(gas, flux, slope, p) {
+  const at0 = flux + slope * p;
+  if (at0 >= 0 || p <= 0) return { [`ocean${gas}`]: Math.max(0, at0), [`ocean${gas}Slope`]: slope };
+  return { [`ocean${gas}`]: 0, [`ocean${gas}Slope`]: -flux / p };
+}
+
+// Root of a rising function of u (the log of the unknown) between lo and
+// hi, starting the search at u0: widen until the sign changes, then the
+// Illinois variant of false position. Returns exp(root); a root beyond the
+// range returns the nearest end.
+function solveRising(fn, u0, lo, hi) {
+  let a = clamp(u0, lo, hi);
+  let fa = fn(a);
+  if (fa === 0) return Math.exp(a);
+  const dir = fa < 0 ? 1 : -1;
+  let b = a;
+  let fb = fa;
+  let width = 0.05;
+  while (Math.sign(fb) === Math.sign(fa)) {
+    if ((dir > 0 && b >= hi) || (dir < 0 && b <= lo)) return Math.exp(b);
+    a = b;
+    fa = fb;
+    b = clamp(b + dir * width, lo, hi);
+    fb = fn(b);
+    width *= 2;
+  }
+  let side = 0;
+  for (let i = 0; i < 60 && Math.abs(b - a) > 1e-5; i++) {
+    const c = (a * fb - b * fa) / (fb - fa);
+    const fc = fn(c);
+    if (fc === 0) return Math.exp(c);
+    if (Math.sign(fc) === Math.sign(fb)) {
+      b = c;
+      fb = fc;
+      if (side === -1) fa /= 2;
+      side = -1;
+    } else {
+      a = c;
+      fa = fc;
+      if (side === 1) fb /= 2;
+      side = 1;
+    }
+  }
+  return Math.exp(Math.abs(fa) < Math.abs(fb) ? a : b);
 }
 
 // Mean temperature of the ice-free latitude bands: where rain falls on

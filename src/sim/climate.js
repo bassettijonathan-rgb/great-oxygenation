@@ -8,15 +8,15 @@
 export const CLIMATE = {
   bands: 18, // per hemisphere, equal area (evenly spaced in sin latitude)
   S0: 1361, // W/m², today's solar constant
-  A: 206, // W/m², outgoing infrared at 0 °C with today's air
+  A: 205, // W/m², outgoing infrared at 0 °C with today's air
   B: 2.09, // W/m² per K (North et al. 1981)
-  D: 0.45, // W/m² per K, poleward heat transport (tuned: today 15 °C, ice from 68°)
+  D: 0.45, // W/m² per K, poleward heat transport (tuned: today 15 °C, ice from 66°)
   albedoFree: 0.3,
   albedoSlope: 0.078, // brighter towards the poles: low sun, more cloud
   albedoIce: 0.62,
   dustDarkening: 0.2, // how far dust and ash can darken the ice of a long snowball
   iceAt: -10, // °C, annual mean
-  iceWidth: 1.2, // K, smooths the edge so the solver does not flicker
+  iceWidth: 3, // K: patchy and seasonal snow blur the ice edge (and keep bands from flipping one by one)
   heatCap: 4, // W/m² per K over one solver pass: only sets how fast it settles
 };
 
